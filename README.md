@@ -1,0 +1,2 @@
+# ScriptGrid
+一个方便口述影像创作者快速将ass/srt字幕转换为xlsx电子表格的web应用
