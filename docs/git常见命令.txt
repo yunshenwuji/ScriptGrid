@@ -1,0 +1,14 @@
+git init
+在本地初始化一个空的git仓库
+git add .
+添加当前目录下的所有文件和文件夹到暂存区
+git commit -m "1.0"
+将修改提交到本地仓库
+git remote add ScriptGrid https://github.com/yunshenwuji/ScriptGrid.git
+关联本地仓库和github上的仓库
+git push -u ScriptGrid main
+将本地仓库的更改推送到github
+git pull ScriptGrid main
+将github上的更改拉到本地
+git pull ScriptGrid main --allow-unrelated-histories
+忽略可能的冲突，强制将远程更改合并到本地
