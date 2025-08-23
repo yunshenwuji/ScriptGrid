@@ -61,6 +61,18 @@
         </div>
     </div>
 
+    <!-- 页尾 -->
+    <footer class="mt-5 py-4 bg-light border-top">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6 text-center">
+                    <p class="mb-2"><strong>述格 (ScriptGrid)</strong> 是一个专为口述影像创作者设计的便捷工具，支持口述稿在 Excel 格式和字幕格式之间的灵活转换。</p>
+                    <p class="mb-0">如果您在使用过程中遇到任何问题或有改进建议，欢迎在 <a href="https://github.com/yunshenwuji/scriptgrid" target="_blank" rel="noopener noreferrer">GitHub 项目</a> 中提交 Issue，我们将积极响应并努力解决。</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
     <!-- Bootstrap 5 JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
@@ -75,7 +87,7 @@
         const messageArea = document.getElementById('messageArea');
         const loadingIndicator = document.getElementById('loadingIndicator');
 
-        // 定义转换类型选项
+        // 定   义转换类型选项
         const conversionOptions = {
             '.ass': [
                 { value: 'ass_to_srt', text: 'ASS 转 SRT (.ass -> .srt)' },
