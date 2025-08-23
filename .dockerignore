@@ -1,0 +1,30 @@
+# Git相关文件
+.git
+.gitignore
+
+# Python缓存文件
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# 文档目录
+docs
+
+# 打包目录
+package
+
+# 项目说明文件
+README.md
+
+# 其他常见排除项
+.pytest_cache
+.coverage
+.env
+.venv
+venv/
+env/
+*.log
+.DS_Store
+Thumbs.db

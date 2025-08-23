@@ -9,7 +9,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 复制项目代码
+# 复制项目代码（.dockerignore会自动排除不需要的文件）
 COPY . .
 
 # 暴露端口
@@ -20,4 +20,4 @@ EXPOSE 8000
 # --host 0.0.0.0 使得应用可以在 Docker 容器外被访问
 # --port 8000 指定监听端口
 # app:app 指的是 app.py 文件中的 FastAPI 实例 app
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]       
