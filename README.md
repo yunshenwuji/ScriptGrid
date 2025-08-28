@@ -20,10 +20,10 @@
 ### 核心优势
 
 - 🌐 **无需安装** - 通过浏览器即可直接使用
-- ⚡ **快速转换** - 支持批量处理，转换速度快
+- ⚡ **快速转换** - 高效的转换引擎，带来极速的转换体验
 - 🎯 **专业定制** - 专为口述影像创作场景设计
 - ♿ **无障碍友好** - 完整支持键盘操作和屏幕阅读器
-- 🔒 **隐私保护** - 文件仅在本地处理，不上传到第三方服务器
+- 🔒 **隐私保护** - 文件处理后会立刻被服务端销毁，绝无泄露风险
 
 ## ✨ 主要功能
 
@@ -238,6 +238,15 @@ docker rm scriptgrid-app
 - 项目主页: [https://github.com/yunshenwuji/scriptgrid](https://github.com/yunshenwuji/scriptgrid)
 - 问题反馈: [GitHub Issues](https://github.com/yunshenwuji/scriptgrid/issues)
 - 在线体验: [https://sg.kadaiad.fun:4680/](https://sg.kadaiad.fun:4680/)
+
+## 💰 支持项目
+
+如果喜欢述格，欢迎捐赠  
+支付宝或微信扫码请我喝杯咖啡
+
+<div align="center">
+  <img src="static/PayQrcode.png" alt="支付宝微信收款二维码" width="200">
+</div>
 
 ---
 
