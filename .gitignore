@@ -205,3 +205,9 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Qoder IDE
+# Qoder is an AI-powered IDE. The .qoder directory contains IDE-specific
+# configuration, workspace state, and user preferences that should not be
+# included in version control.
+.qoder/

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>述格 (ScriptGrid)</title>
+    <title data-i18n="pageTitle">述格 (ScriptGrid)</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
@@ -17,13 +17,45 @@
         #loadingIndicator {
             display: none; /* 默认隐藏 */
         }
+        /* 语言切换器样式 */
+        .language-switch {
+            z-index: 1050;
+        }
+        .language-switch .btn {
+            font-size: 0.875rem;
+            padding: 0.375rem 0.75rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .language-switch .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .language-switch {
+                top: 10px;
+                right: 10px;
+            }
+            .language-switch .btn {
+                font-size: 0.75rem;
+                padding: 0.25rem 0.5rem;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- 语言切换器 -->
+    <div class="language-switch position-fixed top-0 end-0 m-3" style="z-index: 1050;">
+        <button id="langSwitchBtn" class="btn btn-outline-secondary btn-sm">
+            <span id="langSwitchText">English</span>
+        </button>
+    </div>
+
     <div class="container mt-5">
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6">
-                <h1 class="text-center mb-4">述格 (ScriptGrid)</h1>
+                <h1 class="text-center mb-4" data-i18n="mainHeading">述格 (ScriptGrid)</h1>
                 
                 <!-- 信息提示区域 -->
                 <div id="messageArea" class="alert" role="alert" style="display: none;" aria-live="polite"></div>
@@ -31,30 +63,30 @@
                 <!-- 主表单 -->
                 <form id="converterForm">
                     <div class="mb-3">
-                        <label for="subtitleFile" class="form-label">选择字幕文件</label>
+                        <label for="subtitleFile" class="form-label" data-i18n="fileLabel">选择字幕文件</label>
                         <input class="form-control" type="file" id="subtitleFile" accept=".ass,.srt,.xlsx"
                             aria-describedby="fileHelp">
-                        <div id="fileHelp" class="form-text">支持 .ass, .srt, .xlsx 格式。</div>
+                        <div id="fileHelp" class="form-text" data-i18n="fileHelp">支持 .ass, .srt, .xlsx 格式。</div>
                     </div>
 
                     <div class="mb-3">
-                        <label for="conversionType" class="form-label">转换类型</label>
-                        <select class="form-select" id="conversionType" aria-label="选择转换类型" disabled>
-                            <option value="" selected>请先选择文件</option>
+                        <label for="conversionType" class="form-label" data-i18n="conversionLabel">转换类型</label>
+                        <select class="form-select" id="conversionType" aria-label="选择转换类型" disabled data-i18n-aria="conversionAriaLabel">
+                            <option value="" selected data-i18n="selectFile">请先选择文件</option>
                         </select>
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary" id="convertBtn" disabled>开始转换</button>
+                        <button type="submit" class="btn btn-primary" id="convertBtn" disabled data-i18n="convertButton">开始转换</button>
                     </div>
                 </form>
 
                 <!-- 加载指示器 -->
                 <div id="loadingIndicator" class="text-center mt-3" aria-live="polite">
                     <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">处理中...</span>
+                        <span class="visually-hidden" data-i18n="processing">处理中...</span>
                     </div>
-                    <p class="mt-2">处理中，请稍候...</p>
+                    <p class="mt-2" data-i18n="processingMessage">处理中，请稍候...</p>
                 </div>
 
             </div>
@@ -66,14 +98,14 @@
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-md-8 col-lg-6 text-center">
-                    <p class="mb-2"><strong>述格 (ScriptGrid)</strong> 是一个专为口述影像创作者设计的便捷工具，支持口述稿在 Excel 格式和字幕格式之间的灵活转换。</p>
-                    <p class="mb-4">如果您在使用过程中遇到任何问题或有改进建议，欢迎在 <a href="https://github.com/yunshenwuji/scriptgrid" target="_blank" rel="noopener noreferrer">GitHub 项目</a> 中提交 Issue，我们将积极响应并努力解决。</p>
+                    <p class="mb-2"><strong data-i18n="mainHeading">述格 (ScriptGrid)</strong> <span data-i18n="footerDescription">是一个专为口述影像创作者设计的便捷工具，支持口述稿在 Excel 格式和字幕格式之间的灵活转换。</span></p>
+                    <p class="mb-4"><span data-i18n="feedbackText">如果您在使用过程中遇到任何问题或有改进建议，欢迎在</span> <a href="https://github.com/yunshenwuji/scriptgrid" target="_blank" rel="noopener noreferrer" data-i18n="githubProject">GitHub 项目</a> <span data-i18n="feedbackSuffix">中提交 Issue，我们将积极响应并努力解决。</span></p>
                     
                     <!-- 捐赠区域 -->
                     <div class="donation-section">
-                        <p class="mb-2"><strong>如果喜欢述格，欢迎捐赠</strong></p>
-                        <p class="mb-3">支付宝或微信扫码请我喝杯咖啡</p>
-                        <img src="/static/PayQrcode.png" alt="支付宝微信收款二维码" class="img-fluid" style="max-width: 200px; border: 1px solid #ddd; border-radius: 8px;">
+                        <p class="mb-2"><strong data-i18n="donationTitle">如果喜欢述格，欢迎捐赠</strong></p>
+                        <p class="mb-3" data-i18n="donationText">支付宝或微信扫码请我喝杯咖啡</p>
+                        <img src="/static/PayQrcode.png" alt="支付宝微信收款二维码" class="img-fluid" style="max-width: 200px; border: 1px solid #ddd; border-radius: 8px;" data-i18n-alt="paymentQrAlt">
                     </div>
                 </div>
             </div>
@@ -86,6 +118,264 @@
         crossorigin="anonymous"></script>
 
     <script>
+        // ==================== 国际化功能 ====================
+        
+        // 语言数据包
+        const languages = {
+            'zh-CN': {
+                // 页面标题和主要内容
+                pageTitle: '述格 (ScriptGrid)',
+                mainHeading: '述格 (ScriptGrid)',
+                
+                // 表单相关
+                fileLabel: '选择字幕文件',
+                fileHelp: '支持 .ass, .srt, .xlsx 格式。',
+                conversionLabel: '转换类型',
+                selectFile: '请先选择文件',
+                selectConversion: '请选择转换类型',
+                convertButton: '开始转换',
+                
+                // 转换选项
+                assToSrt: 'ASS 转 SRT (.ass -> .srt)',
+                subtitleToExcel: '字幕转表格 (.ass -> .xlsx)',
+                srtToExcel: '字幕转表格 (.srt -> .xlsx)',
+                xlsxToSrt: '表格转字幕 (.xlsx -> .srt)',
+                
+                // 状态消息
+                processing: '处理中...',
+                processingMessage: '处理中，请稍候...',
+                conversionComplete: '转换完成，文件已开始下载。',
+                conversionFailed: '转换失败',
+                unsupportedFile: '不支持的文件类型。',
+                selectFileWarning: '请选择一个文件。',
+                selectTypeWarning: '请选择转换类型。',
+                
+                // 页脚内容
+                footerDescription: '是一个专为口述影像创作者设计的便捷工具，支持口述稿在 Excel 格式和字幕格式之间的灵活转换。',
+                feedbackText: '如果您在使用过程中遇到任何问题或有改进建议，欢迎在',
+                githubProject: 'GitHub 项目',
+                feedbackSuffix: '中提交 Issue，我们将积极响应并努力解决。',
+                donationTitle: '如果喜欢述格，欢迎捐赠',
+                donationText: '支付宝或微信扫码请我喝杯咖啡',
+                
+                // 语言切换
+                langSwitchToEn: 'English',
+                conversionAriaLabel: '选择转换类型',
+                paymentQrAlt: '支付宝微信收款二维码'
+            },
+            
+            'en': {
+                // 页面标题和主要内容
+                pageTitle: 'ScriptGrid',
+                mainHeading: 'ScriptGrid',
+                
+                // 表单相关
+                fileLabel: 'Select Subtitle File',
+                fileHelp: 'Supports .ass, .srt, .xlsx formats.',
+                conversionLabel: 'Conversion Type',
+                selectFile: 'Please select a file first',
+                selectConversion: 'Please select conversion type',
+                convertButton: 'Start Conversion',
+                
+                // 转换选项
+                assToSrt: 'ASS to SRT (.ass -> .srt)',
+                subtitleToExcel: 'Subtitle to Excel (.ass -> .xlsx)',
+                srtToExcel: 'Subtitle to Excel (.srt -> .xlsx)',
+                xlsxToSrt: 'Excel to Subtitle (.xlsx -> .srt)',
+                
+                // 状态消息
+                processing: 'Processing...',
+                processingMessage: 'Processing, please wait...',
+                conversionComplete: 'Conversion completed, file download started.',
+                conversionFailed: 'Conversion failed',
+                unsupportedFile: 'Unsupported file type.',
+                selectFileWarning: 'Please select a file.',
+                selectTypeWarning: 'Please select conversion type.',
+                
+                // 页脚内容
+                footerDescription: 'is a convenient tool designed for audio description creators, supporting flexible conversion between Excel format and subtitle format for descriptive scripts.',
+                feedbackText: 'If you encounter any issues or have suggestions for improvement, please submit an Issue in the',
+                githubProject: 'GitHub project',
+                feedbackSuffix: ', and we will respond actively and work to resolve them.',
+                donationTitle: 'If you like ScriptGrid, donations are welcome',
+                donationText: 'Scan with Alipay or WeChat to buy me a coffee',
+                
+                // 语言切换
+                langSwitchToCn: '中文',
+                conversionAriaLabel: 'Select Conversion Type',
+                paymentQrAlt: 'Alipay and WeChat Payment QR Code'
+            }
+        };
+        
+        // 语言管理类
+        class LanguageManager {
+            constructor() {
+                this.currentLang = this.getStoredLanguage() || 'zh-CN';
+                this.init();
+            }
+            
+            init() {
+                this.bindEvents();
+                this.updateLanguage(this.currentLang);
+            }
+            
+            getStoredLanguage() {
+                return localStorage.getItem('scriptgrid-language');
+            }
+            
+            setStoredLanguage(lang) {
+                localStorage.setItem('scriptgrid-language', lang);
+            }
+            
+            bindEvents() {
+                const langSwitchBtn = document.getElementById('langSwitchBtn');
+                if (langSwitchBtn) {
+                    langSwitchBtn.addEventListener('click', () => {
+                        this.switchLanguage();
+                    });
+                }
+            }
+            
+            switchLanguage() {
+                const newLang = this.currentLang === 'zh-CN' ? 'en' : 'zh-CN';
+                this.updateLanguage(newLang);
+            }
+            
+            updateLanguage(lang) {
+                this.currentLang = lang;
+                this.setStoredLanguage(lang);
+                
+                // 更新HTML lang属性
+                document.documentElement.lang = lang;
+                
+                // 更新页面标题
+                document.title = languages[lang].pageTitle;
+                
+                // 更新所有带有data-i18n属性的元素
+                this.updateElements();
+                
+                // 更新转换选项（如果有文件已选择）
+                this.updateConversionOptionsText();
+                
+                // 更新语言切换按钮
+                this.updateSwitchButton();
+            }
+            
+            updateElements() {
+                const elements = document.querySelectorAll('[data-i18n]');
+                elements.forEach(element => {
+                    const key = element.getAttribute('data-i18n');
+                    if (languages[this.currentLang][key]) {
+                        element.textContent = languages[this.currentLang][key];
+                    }
+                });
+                
+                // 更新aria-label属性
+                const ariaElements = document.querySelectorAll('[data-i18n-aria]');
+                ariaElements.forEach(element => {
+                    const key = element.getAttribute('data-i18n-aria');
+                    if (languages[this.currentLang][key]) {
+                        element.setAttribute('aria-label', languages[this.currentLang][key]);
+                    }
+                });
+                
+                // 更新title属性
+                const titleElements = document.querySelectorAll('[data-i18n-title]');
+                titleElements.forEach(element => {
+                    const key = element.getAttribute('data-i18n-title');
+                    if (languages[this.currentLang][key]) {
+                        element.setAttribute('title', languages[this.currentLang][key]);
+                    }
+                });
+                
+                // 更新alt属性
+                const altElements = document.querySelectorAll('[data-i18n-alt]');
+                altElements.forEach(element => {
+                    const key = element.getAttribute('data-i18n-alt');
+                    if (languages[this.currentLang][key]) {
+                        element.setAttribute('alt', languages[this.currentLang][key]);
+                    }
+                });
+            }
+            
+            updateConversionOptionsText() {
+                // 更新转换选项文本（保持现有逻辑不变，只更新显示文本）
+                const conversionTypeSelect = document.getElementById('conversionType');
+                if (conversionTypeSelect) {
+                    const selectedValue = conversionTypeSelect.value;
+                    
+                    // 更新默认选项文本
+                    const defaultOption = conversionTypeSelect.querySelector('option[value=""]');
+                    if (defaultOption) {
+                        defaultOption.textContent = selectedValue === '' ? 
+                            languages[this.currentLang].selectFile : 
+                            languages[this.currentLang].selectConversion;
+                    }
+                    
+                    // 更新其他选项的文本
+                    this.updateConversionOptionTexts();
+                }
+            }
+            
+            updateConversionOptionTexts() {
+                const conversionTypeSelect = document.getElementById('conversionType');
+                if (!conversionTypeSelect) return;
+                
+                const options = conversionTypeSelect.querySelectorAll('option[value]:not([value=""])');
+                options.forEach(option => {
+                    const value = option.value;
+                    let textKey = '';
+                    
+                    switch(value) {
+                        case 'ass_to_srt':
+                            textKey = 'assToSrt';
+                            break;
+                        case 'subtitle_to_excel':
+                            textKey = option.textContent.includes('.ass') ? 'subtitleToExcel' : 'srtToExcel';
+                            break;
+                        case 'xlsx_to_srt':
+                            textKey = 'xlsxToSrt';
+                            break;
+                    }
+                    
+                    if (textKey && languages[this.currentLang][textKey]) {
+                        option.textContent = languages[this.currentLang][textKey];
+                    }
+                });
+            }
+            
+            updateSwitchButton() {
+                const langSwitchBtn = document.getElementById('langSwitchBtn');
+                const langSwitchText = document.getElementById('langSwitchText');
+                
+                if (langSwitchBtn && langSwitchText) {
+                    const targetLangText = this.currentLang === 'zh-CN' ? 
+                        languages[this.currentLang].langSwitchToEn : 
+                        languages[this.currentLang].langSwitchToCn;
+                    
+                    // 更新按钮文本
+                    langSwitchText.textContent = targetLangText;
+                    
+                    // 更新aria-label和title属性
+                    langSwitchBtn.setAttribute('aria-label', targetLangText);
+                    langSwitchBtn.setAttribute('title', targetLangText);
+                }
+            }
+            
+            // 获取当前语言的文本
+            getText(key) {
+                return languages[this.currentLang][key] || key;
+            }
+        }
+        
+        // 初始化语言管理器
+        let languageManager;
+        document.addEventListener('DOMContentLoaded', function() {
+            languageManager = new LanguageManager();
+        });
+        
+        // ==================== 原有的转换功能 ====================
+        
         // 获取DOM元素
         const fileInput = document.getElementById('subtitleFile');
         const conversionTypeSelect = document.getElementById('conversionType');
@@ -94,19 +384,21 @@
         const messageArea = document.getElementById('messageArea');
         const loadingIndicator = document.getElementById('loadingIndicator');
 
-        // 定   义转换类型选项
-        const conversionOptions = {
-            '.ass': [
-                { value: 'ass_to_srt', text: 'ASS 转 SRT (.ass -> .srt)' },
-                { value: 'subtitle_to_excel', text: '字幕转表格 (.ass -> .xlsx)' }
-            ],
-            '.srt': [
-                { value: 'subtitle_to_excel', text: '字幕转表格 (.srt -> .xlsx)' }
-            ],
-            '.xlsx': [
-                { value: 'xlsx_to_srt', text: '表格转字幕 (.xlsx -> .srt)' }
-            ]
-        };
+        // 定义转换类型选项（更新为使用国际化文本）
+        function getConversionOptions() {
+            return {
+                '.ass': [
+                    { value: 'ass_to_srt', getText: () => languageManager.getText('assToSrt') },
+                    { value: 'subtitle_to_excel', getText: () => languageManager.getText('subtitleToExcel') }
+                ],
+                '.srt': [
+                    { value: 'subtitle_to_excel', getText: () => languageManager.getText('srtToExcel') }
+                ],
+                '.xlsx': [
+                    { value: 'xlsx_to_srt', getText: () => languageManager.getText('xlsxToSrt') }
+                ]
+            };
+        }
 
         // 文件选择事件监听器
         fileInput.addEventListener('change', function () {
@@ -116,15 +408,15 @@
                 const fileExtension = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
 
                 // 重置并更新转换类型下拉框
-                conversionTypeSelect.innerHTML = '<option value="" selected>请选择转换类型</option>';
+                conversionTypeSelect.innerHTML = `<option value="" selected>${languageManager.getText('selectFile')}</option>`;
                 conversionTypeSelect.disabled = false;
 
-                const options = conversionOptions[fileExtension];
+                const options = getConversionOptions()[fileExtension];
                 if (options && options.length > 0) {
                     options.forEach(option => {
                         const opt = document.createElement('option');
                         opt.value = option.value;
-                        opt.textContent = option.text;
+                        opt.textContent = option.getText();
                         conversionTypeSelect.appendChild(opt);
                     });
                     convertButton.disabled = false; // 启用转换按钮
@@ -132,11 +424,11 @@
                 } else {
                     conversionTypeSelect.disabled = true;
                     convertButton.disabled = true;
-                    showMessage('不支持的文件类型。', 'warning');
+                    showMessage(languageManager.getText('unsupportedFile'), 'warning');
                 }
             } else {
                 // 如果没有选择文件，重置状态
-                conversionTypeSelect.innerHTML = '<option value="" selected>请先选择文件</option>';
+                conversionTypeSelect.innerHTML = `<option value="" selected>${languageManager.getText('selectFile')}</option>`;
                 conversionTypeSelect.disabled = true;
                 convertButton.disabled = true;
                 hideMessage();
@@ -151,12 +443,12 @@
             const conversionType = conversionTypeSelect.value;
 
             if (!file) {
-                showMessage('请选择一个文件。', 'warning');
+                showMessage(languageManager.getText('selectFileWarning'), 'warning');
                 return;
             }
 
             if (!conversionType) {
-                showMessage('请选择转换类型。', 'warning');
+                showMessage(languageManager.getText('selectTypeWarning'), 'warning');
                 return;
             }
 
@@ -196,17 +488,17 @@
                     document.body.removeChild(link);
                     window.URL.revokeObjectURL(downloadUrl); // 清理URL对象
 
-                    showMessage('转换完成，文件已开始下载。', 'success');
+                    showMessage(languageManager.getText('conversionComplete'), 'success');
                 } else {
                     // 处理后端返回的错误
                     const errorText = await response.text();
                     console.error('转换失败:', response.status, errorText);
-                    showMessage(`转换失败: ${errorText || '服务器错误'}`, 'danger');
+                    showMessage(`${languageManager.getText('conversionFailed')}: ${errorText || '服务器错误'}`, 'danger');
                 }
             } catch (error) {
                 // 处理网络或其他异常
                 console.error('请求失败:', error);
-                showMessage(`请求失败: ${error.message}`, 'danger');
+                showMessage(`${languageManager.getText('conversionFailed')}: ${error.message}`, 'danger');
             } finally {
                 // 隐藏加载指示器，恢复表单控件
                 showLoading(false);

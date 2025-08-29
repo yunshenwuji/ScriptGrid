@@ -1,5 +1,7 @@
 # 述格 (ScriptGrid)
 
+[English](docs/README_EN.md) | 中文
+
 ![Python Version](https://img.shields.io/badge/Python-3.13+-blue.svg)
 ![Framework](https://img.shields.io/badge/Framework-FastAPI-green.svg)
 ![Deployment](https://img.shields.io/badge/Deploy-Docker-blue.svg)
