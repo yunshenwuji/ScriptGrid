@@ -28,3 +28,6 @@ env/
 *.log
 .DS_Store
 Thumbs.db
+
+# IDE配置文件
+.qoder/
