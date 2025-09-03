@@ -18,3 +18,16 @@ class WriteError(SubtitleConverterError):
 class ConversionError(SubtitleConverterError):
     """转换过程中发生的通用错误"""
     pass
+
+# SUP PGS 相关异常类
+class SupParseError(ParseError):
+    """SUP文件解析错误"""
+    pass
+
+class OcrRecognitionError(ParseError):
+    """OCR识别错误"""
+    pass
+
+class LanguageDetectionError(ParseError):
+    """语言检测错误"""
+    pass

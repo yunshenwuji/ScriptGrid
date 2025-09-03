@@ -34,12 +34,15 @@
 - **字幕转表格**: 将 `.ass` 和 `.srt` 格式转换为结构化的 `.xlsx` 表格
 - **表格转字幕**: 将标准格式的 `.xlsx` 表格转换为 `.srt` 格式
 - **字幕格式互转**: 将 `.ass` 格式转换为更通用的 `.srt` 格式
+- **SUP PGS 支持**: 将 `.sup` 格式的图像字幕转换为 `.srt` 或 `.xlsx` 格式
 
 ### ⚙️ 智能识别与提取
 
 - 自动识别文件类型并动态显示可用的转换选项
 - 精确提取字幕文件中的**序号、开始时间、结束时间、字幕内容**等关键信息
 - 支持从 `.ass` 文件中剥离特效标签，保留纯净的文本内容
+- **SUP 图像识别**: 使用 EasyOCR 技术自动识别 SUP 格式中的图像字幕
+- **语言智能检测**: 自动检测字幕语言（中文/英文/混合），优化 OCR 识别效果
 
 ### 🌐 现代 Web 体验
 
@@ -57,7 +60,7 @@
 
 ### 使用步骤
 
-1. **选择文件**: 点击"选择字幕文件"按钮，上传您的文件（支持 .ass, .srt, .xlsx 格式）
+1. **选择文件**: 点击"选择字幕文件"按钮，上传您的文件（支持 .ass, .srt, .xlsx, .sup 格式）
 2. **选择转换类型**: 系统会自动识别文件类型并显示可用的转换选项
 3. **开始转换**: 点击"开始转换"按钮
 4. **下载结果**: 转换完成后，文件会自动下载到您的设备
@@ -70,6 +73,8 @@
 | .ass | .xlsx | ASS 字幕转 Excel 表格 |
 | .srt | .xlsx | SRT 字幕转 Excel 表格 |
 | .xlsx | .srt | Excel 表格转 SRT 字幕 |
+| .sup | .srt | SUP PGS 字幕转 SRT 格式 |
+| .sup | .xlsx | SUP PGS 字幕转 Excel 表格 |
 
 ## 🛠️ 技术架构
 
@@ -82,6 +87,7 @@
 - **框架**: [FastAPI](https://fastapi.tiangolo.com/) - 高性能异步 Web 框架
 - **服务器**: [Uvicorn](https://www.uvicorn.org/) - ASGI 服务器
 - **核心库**: [openpyxl](https://openpyxl.readthedocs.io/) - Excel 文件处理
+- **OCR 识别**: [EasyOCR](https://github.com/JaidedAI/EasyOCR) - 图像文字识别
 
 **前端 (Frontend)**
 - **基础**: HTML5, CSS3, JavaScript (ES6+)
@@ -100,6 +106,8 @@ ScriptGrid/
 ├── parsers.py            # 字幕文件解析器
 ├── writers.py            # 文件写入器
 ├── subtitle_converter.py # 核心转换逻辑
+├── pgsreader.py          # SUP PGS 文件解析器
+├── imagemaker.py         # 图像处理模块
 ├── static/               # 静态资源
 │   └── index.html        # 前端页面
 ├── templates/            # 模板文件
@@ -223,7 +231,13 @@ docker rm scriptgrid-app
 
 ## 📝 更新日志
 
-### v1.0.0 (Current)
+### v1.1.0 (Latest)
+- ✨ 新增 SUP PGS 字幕格式支持
+- ✨ 集成 EasyOCR 技术，支持图像字幕识别
+- ✨ 自动语言检测，优化中英文字幕识别
+- ✨ 支持 .sup 转 .srt 和 .sup 转 .xlsx 格式
+
+### v1.0.0
 - ✨ 支持 .ass/.srt 转 .xlsx 格式
 - ✨ 支持 .xlsx 转 .srt 格式
 - ✨ 支持 .ass 转 .srt 格式

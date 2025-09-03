@@ -24,7 +24,7 @@ if not logger.handlers:
 
 # Import local modules
 # We assume these are in the same directory or PYTHONPATH
-from parsers import parse_srt, parse_ass_to_srt_structure
+from parsers import parse_srt, parse_ass_to_srt_structure, parse_sup_to_srt_structure
 from writers import write_to_excel, write_to_srt, parse_xlsx
 from exceptions import SubtitleConverterError, ParseError, WriteError
 import constants
@@ -39,6 +39,8 @@ def convert(input_path: str, output_path: str, conversion_type: str) -> None:
                         'subtitle_to_excel': .srt/.ass -> .xlsx
                         'ass_to_srt': .ass -> .srt
                         'xlsx_to_srt': .xlsx -> .srt
+                        'sup_to_srt': .sup -> .srt
+                        'sup_to_excel': .sup -> .xlsx
     :raises SubtitleConverterError: 转换过程中发生的任何错误。
     """
     logger.info(f"Starting conversion: {input_path} -> {output_path} (type: {conversion_type})")
@@ -65,6 +67,18 @@ def convert(input_path: str, output_path: str, conversion_type: str) -> None:
             else:
                 raise SubtitleConverterError("输入文件必须是 .xlsx 格式。")
 
+        elif conversion_type == 'sup_to_srt':
+            if input_path.lower().endswith('.sup'):
+                data = parse_sup_to_srt_structure(input_path)
+            else:
+                raise SubtitleConverterError("输入文件必须是 .sup 格式。")
+
+        elif conversion_type == 'sup_to_excel':
+            if input_path.lower().endswith('.sup'):
+                data = parse_sup_to_srt_structure(input_path)
+            else:
+                raise SubtitleConverterError("输入文件必须是 .sup 格式。")
+
         else:
             raise SubtitleConverterError(f"不支持的转换类型: {conversion_type}")
 
@@ -76,10 +90,68 @@ def convert(input_path: str, output_path: str, conversion_type: str) -> None:
         # --- 3. 写入阶段 ---
         if conversion_type == 'subtitle_to_excel':
             write_to_excel(data, output_path)
-        elif conversion_type in ['ass_to_srt', 'xlsx_to_srt']:
+        elif conversion_type in ['ass_to_srt', 'xlsx_to_srt', 'sup_to_srt']:
             write_to_srt(data, output_path)
+        elif conversion_type == 'sup_to_excel':
+            write_to_excel(data, output_path)
         
         logger.info(f"Conversion successful: {output_path}")
+
+    except (ParseError, WriteError) as e:
+        # 重新抛出为更通用的转换错误
+        logger.error(f"Parse/Write error during conversion: {e}")
+        raise SubtitleConverterError(str(e)) from e
+    except SubtitleConverterError:
+        # 重新抛出我们自定义的错误
+        logger.error("SubtitleConverterError occurred.")
+        raise
+    except Exception as e:
+        # 捕获所有其他未预期的错误
+        logger.error(f"Unexpected error during conversion: {e}")
+        raise SubtitleConverterError(f"转换过程中发生未预期的错误: {e}") from e
+
+
+def convert_with_progress(input_path: str, output_path: str, conversion_type: str, progress_callback=None, target_language=None) -> None:
+    """
+    执行字幕文件的转换（带进度回调）。
+    :param input_path: 输入文件的完整路径。
+    :param output_path: 输出文件的完整路径。
+    :param conversion_type: 转换类型。
+    :param progress_callback: 进度回调函数 callback(current, total, message)
+    :param target_language: 目标语言代码，None 时自动检测
+    :raises SubtitleConverterError: 转换过程中发生的任何错误。
+    """
+    logger.info(f"Starting conversion with progress: {input_path} -> {output_path} (type: {conversion_type})")
+    data: List[List[str]] = []
+    try:
+        # --- 1. 解析阶段 ---
+        if conversion_type == 'sup_to_srt':
+            if input_path.lower().endswith('.sup'):
+                data = parse_sup_to_srt_structure(input_path, target_language=target_language, progress_callback=progress_callback)
+            else:
+                raise SubtitleConverterError("输入文件必须是 .sup 格式。")
+
+        elif conversion_type == 'sup_to_excel':
+            if input_path.lower().endswith('.sup'):
+                data = parse_sup_to_srt_structure(input_path, target_language=target_language, progress_callback=progress_callback)
+            else:
+                raise SubtitleConverterError("输入文件必须是 .sup 格式。")
+        
+        else:
+            raise SubtitleConverterError(f"不支持的转换类型: {conversion_type}")
+
+        # --- 2. 检查解析结果 ---
+        if not data:
+            logger.warning("No data parsed from the input file.")
+            raise SubtitleConverterError(constants.MSG_WARNING_NO_DATA_PARSED)
+
+        # --- 3. 写入阶段 ---
+        if conversion_type == 'sup_to_excel':
+            write_to_excel(data, output_path)
+        elif conversion_type == 'sup_to_srt':
+            write_to_srt(data, output_path)
+        
+        logger.info(f"Conversion with progress successful: {output_path}")
 
     except (ParseError, WriteError) as e:
         # 重新抛出为更通用的转换错误

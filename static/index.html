@@ -58,13 +58,13 @@
                 <h1 class="text-center mb-4" data-i18n="mainHeading">述格 (ScriptGrid)</h1>
                 
                 <!-- 信息提示区域 -->
-                <div id="messageArea" class="alert" role="alert" style="display: none;" aria-live="polite"></div>
+                <div id="messageArea" class="alert" role="alert" style="display: none;"></div>
 
                 <!-- 主表单 -->
                 <form id="converterForm">
                     <div class="mb-3">
                         <label for="subtitleFile" class="form-label" data-i18n="fileLabel">选择字幕文件</label>
-                        <input class="form-control" type="file" id="subtitleFile" accept=".ass,.srt,.xlsx"
+                        <input class="form-control" type="file" id="subtitleFile" accept=".ass,.srt,.xlsx,.sup"
                             aria-describedby="fileHelp">
                         <div id="fileHelp" class="form-text" data-i18n="fileHelp">支持 .ass, .srt, .xlsx 格式。</div>
                     </div>
@@ -76,17 +76,59 @@
                         </select>
                     </div>
 
+                    <!-- 语言选择框（仅对SUP文件显示） -->
+                    <div class="mb-3" id="languageSelectionContainer" style="display: none;">
+                        <label for="targetLanguage" class="form-label" data-i18n="languageLabel">字幕语言</label>
+                        <select class="form-select" id="targetLanguage" aria-label="选择字幕语言" data-i18n-aria="languageAriaLabel">
+                            <option value="auto" selected data-i18n="autoDetect">自动检测</option>
+                        </select>
+                        <div class="form-text" data-i18n="languageHelp">如果自动检测不准确，可手动选择字幕语言。</div>
+                    </div>
+
                     <div class="d-grid gap-2">
                         <button type="submit" class="btn btn-primary" id="convertBtn" disabled data-i18n="convertButton">开始转换</button>
                     </div>
                 </form>
 
                 <!-- 加载指示器 -->
-                <div id="loadingIndicator" class="text-center mt-3" aria-live="polite">
+                <div id="loadingIndicator" class="text-center mt-3">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden" data-i18n="processing">处理中...</span>
                     </div>
                     <p class="mt-2" data-i18n="processingMessage">处理中，请稍候...</p>
+                    
+                    <!-- SUP 转换进度显示 -->
+                    <div id="supProgress" class="mt-3" style="display: none;">
+                        <!-- 阶段指示器 -->
+                        <div class="mb-3">
+                            <h6 id="phaseTitle" class="text-center mb-2">正在解析SUP文件...</h6>
+                            <div class="progress mb-2">
+                                <div id="progressBar" class="progress-bar" role="progressbar" 
+                                     style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                    0%
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 详细信息面板 -->
+                        <div class="card border-light">
+                            <div class="card-body p-3">
+                                <div class="row text-center">
+                                    <div class="col-6">
+                                        <div class="text-muted small" data-i18n="frameProgressLabel">当前进度</div>
+                                        <div id="frameProgress" class="fw-bold">0 / 0</div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="text-muted small" data-i18n="subtitleCountLabel">已识别字幕</div>
+                                        <div id="subtitleCount" class="fw-bold">0 条</div>
+                                    </div>
+                                </div>
+                                <div class="mt-2">
+                                    <p id="progressMessage" class="small text-muted mb-0 text-center">处理中...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
             </div>
@@ -129,7 +171,7 @@
                 
                 // 表单相关
                 fileLabel: '选择字幕文件',
-                fileHelp: '支持 .ass, .srt, .xlsx 格式。',
+                fileHelp: '支持 .ass, .srt, .xlsx, .sup 格式。',
                 conversionLabel: '转换类型',
                 selectFile: '请先选择文件',
                 selectConversion: '请选择转换类型',
@@ -140,6 +182,14 @@
                 subtitleToExcel: '字幕转表格 (.ass -> .xlsx)',
                 srtToExcel: '字幕转表格 (.srt -> .xlsx)',
                 xlsxToSrt: '表格转字幕 (.xlsx -> .srt)',
+                supToSrt: 'SUP 转 SRT (.sup -> .srt)',
+                supToExcel: 'SUP 转表格 (.sup -> .xlsx)',
+                
+                // 语言选择
+                languageLabel: '字幕语言',
+                autoDetect: '自动检测',
+                languageHelp: '如果自动检测不准确，可手动选择字幕语言。',
+                languageAriaLabel: '选择字幕语言',
                 
                 // 状态消息
                 processing: '处理中...',
@@ -161,7 +211,25 @@
                 // 语言切换
                 langSwitchToEn: 'English',
                 conversionAriaLabel: '选择转换类型',
-                paymentQrAlt: '支付宝微信收款二维码'
+                paymentQrAlt: '支付宝微信收款二维码',
+                
+                // SUP 转换进度提示
+                supProcessing: 'SUP 文件转换中，请耐心等待...',
+                supProgress: '正在处理第 {current} / {total} 帧...',
+                supComplete: '转换完成！共处理 {count} 条字幕',
+                
+                // SUP 转换阶段
+                phases: {
+                    file_parsing: '正在解析SUP文件...',
+                    language_detection: '正在检测字幕语言...',
+                    ocr_init: '正在初始化OCR引擎...',
+                    ocr_processing: '正在识别字幕内容...',
+                    complete: '转换完成！'
+                },
+                
+                // 进度显示标签
+                frameProgressLabel: '当前进度',
+                subtitleCountLabel: '已识别字幕'
             },
             
             'en': {
@@ -171,7 +239,7 @@
                 
                 // 表单相关
                 fileLabel: 'Select Subtitle File',
-                fileHelp: 'Supports .ass, .srt, .xlsx formats.',
+                fileHelp: 'Supports .ass, .srt, .xlsx, .sup formats.',
                 conversionLabel: 'Conversion Type',
                 selectFile: 'Please select a file first',
                 selectConversion: 'Please select conversion type',
@@ -182,6 +250,14 @@
                 subtitleToExcel: 'Subtitle to Excel (.ass -> .xlsx)',
                 srtToExcel: 'Subtitle to Excel (.srt -> .xlsx)',
                 xlsxToSrt: 'Excel to Subtitle (.xlsx -> .srt)',
+                supToSrt: 'SUP to SRT (.sup -> .srt)',
+                supToExcel: 'SUP to Excel (.sup -> .xlsx)',
+                
+                // 语言选择
+                languageLabel: 'Subtitle Language',
+                autoDetect: 'Auto Detect',
+                languageHelp: 'If auto detection is inaccurate, you can manually select the subtitle language.',
+                languageAriaLabel: 'Select Subtitle Language',
                 
                 // 状态消息
                 processing: 'Processing...',
@@ -203,7 +279,25 @@
                 // 语言切换
                 langSwitchToCn: '中文',
                 conversionAriaLabel: 'Select Conversion Type',
-                paymentQrAlt: 'Alipay and WeChat Payment QR Code'
+                paymentQrAlt: 'Alipay and WeChat Payment QR Code',
+                
+                // SUP 转换进度提示
+                supProcessing: 'Converting SUP file, please wait...',
+                supProgress: 'Processing frame {current} / {total}...',
+                supComplete: 'Conversion complete! Processed {count} subtitles',
+                
+                // SUP 转换阶段
+                phases: {
+                    file_parsing: 'Parsing SUP file...',
+                    language_detection: 'Detecting subtitle language...',
+                    ocr_init: 'Initializing OCR engine...',
+                    ocr_processing: 'Recognizing subtitle content...',
+                    complete: 'Conversion complete!'
+                },
+                
+                // 进度显示标签
+                frameProgressLabel: 'Current Progress',
+                subtitleCountLabel: 'Recognized Subtitles'
             }
         };
         
@@ -217,6 +311,12 @@
             init() {
                 this.bindEvents();
                 this.updateLanguage(this.currentLang);
+                // 确保在初始化后更新语言选项
+                setTimeout(() => {
+                    if (typeof updateLanguageOptions === 'function') {
+                        updateLanguageOptions();
+                    }
+                }, 100);
             }
             
             getStoredLanguage() {
@@ -259,6 +359,11 @@
                 
                 // 更新语言切换按钮
                 this.updateSwitchButton();
+                
+                // 更新语言选择框选项（重要！）
+                if (typeof updateLanguageOptions === 'function') {
+                    updateLanguageOptions();
+                }
             }
             
             updateElements() {
@@ -336,6 +441,12 @@
                         case 'xlsx_to_srt':
                             textKey = 'xlsxToSrt';
                             break;
+                        case 'sup_to_srt':
+                            textKey = 'supToSrt';
+                            break;
+                        case 'sup_to_excel':
+                            textKey = 'supToExcel';
+                            break;
                     }
                     
                     if (textKey && languages[this.currentLang][textKey]) {
@@ -370,19 +481,251 @@
         
         // 初始化语言管理器
         let languageManager;
-        document.addEventListener('DOMContentLoaded', function() {
+        
+        // 全局变量存储支持的语言列表
+        let supportedLanguages = {};
+        
+        // 获取DOM元素（在DOMContentLoaded事件中获取）
+        let fileInput, conversionTypeSelect, convertButton, form, messageArea, loadingIndicator;
+        let languageSelectionContainer, targetLanguageSelect;
+        
+        // 初始化函数
+        function initializeApp() {
+            // 获取DOM元素
+            fileInput = document.getElementById('subtitleFile');
+            conversionTypeSelect = document.getElementById('conversionType');
+            convertButton = document.getElementById('convertBtn');
+            form = document.getElementById('converterForm');
+            messageArea = document.getElementById('messageArea');
+            loadingIndicator = document.getElementById('loadingIndicator');
+            languageSelectionContainer = document.getElementById('languageSelectionContainer');
+            targetLanguageSelect = document.getElementById('targetLanguage');
+            
+            // 初始化语言管理器
             languageManager = new LanguageManager();
-        });
+            
+            // 绑定事件监听器
+            bindEventListeners();
+            
+            // 加载支持的语言列表
+            loadSupportedLanguages();
+        }
         
-        // ==================== 原有的转换功能 ====================
+        // 绑定事件监听器函数
+        function bindEventListeners() {
+            // 文件选择事件监听器
+            fileInput.addEventListener('change', function () {
+                const file = this.files[0];
+                if (file) {
+                    const fileName = file.name;
+                    const fileExtension = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+
+                    // 重置并更新转换类型下拉框
+                    conversionTypeSelect.innerHTML = `<option value="" selected>${languageManager.getText('selectFile')}</option>`;
+                    conversionTypeSelect.disabled = false;
+
+                    const options = getConversionOptions()[fileExtension];
+                    if (options && options.length > 0) {
+                        options.forEach(option => {
+                            const opt = document.createElement('option');
+                            opt.value = option.value;
+                            opt.textContent = option.getText();
+                            conversionTypeSelect.appendChild(opt);
+                        });
+                        convertButton.disabled = false; // 启用转换按钮
+                        hideMessage(); // 清除可能存在的旧消息
+                        
+                        // 检查是否为SUP文件，如果是则显示语言选择框
+                        if (fileExtension === '.sup') {
+                            languageSelectionContainer.style.display = 'block';
+                        } else {
+                            languageSelectionContainer.style.display = 'none';
+                        }
+                    } else {
+                        conversionTypeSelect.disabled = true;
+                        convertButton.disabled = true;
+                        languageSelectionContainer.style.display = 'none'; // 隐藏语言选择框
+                        showMessage(languageManager.getText('unsupportedFile'), 'warning');
+                    }
+                } else {
+                    // 如果没有选择文件，重置状态
+                    conversionTypeSelect.innerHTML = `<option value="" selected>${languageManager.getText('selectFile')}</option>`;
+                    conversionTypeSelect.disabled = true;
+                    convertButton.disabled = true;
+                    languageSelectionContainer.style.display = 'none'; // 隐藏语言选择框
+                    hideMessage();
+                }
+            });
+
+            // 表单提交事件监听器
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault(); // 阻止表单默认提交
+
+                const file = fileInput.files[0];
+                const conversionType = conversionTypeSelect.value;
+
+                if (!file) {
+                    showMessage(languageManager.getText('selectFileWarning'), 'warning');
+                    return;
+                }
+
+                if (!conversionType) {
+                    showMessage(languageManager.getText('selectTypeWarning'), 'warning');
+                    return;
+                }
+
+                // 准备FormData用于文件上传
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('conversion_type', conversionType);
+                
+                // 如果是SUP转换，添加语言参数
+                if (conversionType.startsWith('sup_')) {
+                    const targetLanguage = targetLanguageSelect.value || 'auto';
+                    formData.append('target_language', targetLanguage);
+                }
+
+                // 显示加载指示器，禁用表单控件
+                showLoading(true);
+                fileInput.disabled = true;
+                conversionTypeSelect.disabled = true;
+                convertButton.disabled = true;
+
+                // 检查是否为SUP转换，如果是则显示进度
+                const isSupConversion = conversionType.startsWith('sup_');
+                if (isSupConversion) {
+                    showSupProgress(true);
+                }
+
+                try {
+                    // 发送POST请求到后端API
+                    const response = await fetch('/api/convert', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (response.ok) {
+                        // 检查是否是SUP转换的异步响应
+                        const contentType = response.headers.get('content-type');
+                        
+                        if (contentType && contentType.includes('application/json') && isSupConversion) {
+                            // SUP转换：异步模式
+                            const result = await response.json();
+                            const taskId = result.task_id;
+                            
+                            console.log('获取到SUP转换任务ID:', taskId);
+                            console.log('响应数据:', result);
+                            
+                            if (taskId) {
+                                // 启动进度监听
+                                console.log('开始监听任务进度:', taskId);
+                                startProgressMonitoring(taskId);
+                            } else {
+                                throw new Error('未获取到任务ID');
+                            }
+                        } else {
+                            // 其他转换：同步模式，直接下载
+                            const taskId = response.headers.get('X-Task-ID');
+                            
+                            // 转换成功，处理文件下载
+                            const blob = await response.blob();
+                            const downloadUrl = window.URL.createObjectURL(blob);
+                            const link = document.createElement('a');
+                            link.href = downloadUrl;
+                            // 根据转换类型设置默认文件名后缀
+                            let fileExt = '.xlsx';
+                            if (conversionType === 'ass_to_srt' || conversionType === 'xlsx_to_srt' || conversionType === 'sup_to_srt') {
+                                fileExt = '.srt';
+                            }
+                            link.download = file.name.substring(0, file.name.lastIndexOf('.')) + fileExt;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            window.URL.revokeObjectURL(downloadUrl); // 清理URL对象
+
+                            showMessage(languageManager.getText('conversionComplete'), 'success');
+                        }
+                    } else {
+                        // 处理后端返回的错误
+                        const errorText = await response.text();
+                        console.error('转换失败:', response.status, errorText);
+                        showMessage(`${languageManager.getText('conversionFailed')}: ${errorText || '服务器错误'}`, 'danger');
+                    }
+                } catch (error) {
+                    // 处理网络或其他异常
+                    console.error('请求失败:', error);
+                    showMessage(`${languageManager.getText('conversionFailed')}: ${error.message}`, 'danger');
+                } finally {
+                    // 只有非-SUP转换才立即恢复控件
+                    if (!isSupConversion) {
+                        showLoading(false);
+                        showSupProgress(false);
+                        fileInput.disabled = false;
+                        conversionTypeSelect.disabled = false;
+                        convertButton.disabled = false;
+                    }
+                }
+            });
+        }
         
-        // 获取DOM元素
-        const fileInput = document.getElementById('subtitleFile');
-        const conversionTypeSelect = document.getElementById('conversionType');
-        const convertButton = document.getElementById('convertBtn');
-        const form = document.getElementById('converterForm');
-        const messageArea = document.getElementById('messageArea');
-        const loadingIndicator = document.getElementById('loadingIndicator');
+        // 加载支持的语言列表
+        async function loadSupportedLanguages() {
+            try {
+                const response = await fetch('/api/supported-languages');
+                const data = await response.json();
+                if (data.success) {
+                    supportedLanguages = data.languages;
+                    updateLanguageOptions();
+                } else {
+                    console.error('获取语言列表失败:', data.error);
+                    // 使用默认语言列表
+                    supportedLanguages = data.languages;
+                    updateLanguageOptions();
+                }
+            } catch (error) {
+                console.error('加载语言列表失败:', error);
+                // 使用默认语言列表
+                supportedLanguages = {
+                    'zh-CN': {
+                        'auto': '自动检测',
+                        'ch_sim': '简体中文',
+                        'en': '英语'
+                    },
+                    'en': {
+                        'auto': 'Auto Detect',
+                        'ch_sim': 'Simplified Chinese',
+                        'en': 'English'
+                    }
+                };
+                updateLanguageOptions();
+            }
+        }
+        
+        // 更新语言选择框的选项
+        function updateLanguageOptions() {
+            if (!languageManager || !targetLanguageSelect) return;
+            
+            const currentLang = languageManager.currentLang;
+            const languages = supportedLanguages[currentLang] || supportedLanguages['zh-CN'] || {};
+            
+            // 记录当前选中的值
+            const currentValue = targetLanguageSelect.value;
+            
+            // 清空现有选项
+            targetLanguageSelect.innerHTML = '';
+            
+            // 添加语言选项
+            Object.entries(languages).forEach(([code, name]) => {
+                const option = document.createElement('option');
+                option.value = code;
+                option.textContent = name;
+                // 恢复之前选中的值，如果不存在则默认选择auto
+                if (code === currentValue || (code === 'auto' && !currentValue)) {
+                    option.selected = true;
+                }
+                targetLanguageSelect.appendChild(option);
+            });
+        }
 
         // 定义转换类型选项（更新为使用国际化文本）
         function getConversionOptions() {
@@ -396,128 +739,35 @@
                 ],
                 '.xlsx': [
                     { value: 'xlsx_to_srt', getText: () => languageManager.getText('xlsxToSrt') }
+                ],
+                '.sup': [
+                    { value: 'sup_to_srt', getText: () => languageManager.getText('supToSrt') },
+                    { value: 'sup_to_excel', getText: () => languageManager.getText('supToExcel') }
                 ]
             };
         }
-
-        // 文件选择事件监听器
-        fileInput.addEventListener('change', function () {
-            const file = this.files[0];
-            if (file) {
-                const fileName = file.name;
-                const fileExtension = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
-
-                // 重置并更新转换类型下拉框
-                conversionTypeSelect.innerHTML = `<option value="" selected>${languageManager.getText('selectFile')}</option>`;
-                conversionTypeSelect.disabled = false;
-
-                const options = getConversionOptions()[fileExtension];
-                if (options && options.length > 0) {
-                    options.forEach(option => {
-                        const opt = document.createElement('option');
-                        opt.value = option.value;
-                        opt.textContent = option.getText();
-                        conversionTypeSelect.appendChild(opt);
-                    });
-                    convertButton.disabled = false; // 启用转换按钮
-                    hideMessage(); // 清除可能存在的旧消息
-                } else {
-                    conversionTypeSelect.disabled = true;
-                    convertButton.disabled = true;
-                    showMessage(languageManager.getText('unsupportedFile'), 'warning');
-                }
-            } else {
-                // 如果没有选择文件，重置状态
-                conversionTypeSelect.innerHTML = `<option value="" selected>${languageManager.getText('selectFile')}</option>`;
-                conversionTypeSelect.disabled = true;
-                convertButton.disabled = true;
-                hideMessage();
-            }
-        });
-
-        // 表单提交事件监听器
-        form.addEventListener('submit', async function (e) {
-            e.preventDefault(); // 阻止表单默认提交
-
-            const file = fileInput.files[0];
-            const conversionType = conversionTypeSelect.value;
-
-            if (!file) {
-                showMessage(languageManager.getText('selectFileWarning'), 'warning');
-                return;
-            }
-
-            if (!conversionType) {
-                showMessage(languageManager.getText('selectTypeWarning'), 'warning');
-                return;
-            }
-
-            // 准备FormData用于文件上传
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('conversion_type', conversionType);
-
-            // 显示加载指示器，禁用表单控件
-            showLoading(true);
-            fileInput.disabled = true;
-            conversionTypeSelect.disabled = true;
-            convertButton.disabled = true;
-
-            try {
-                // 发送POST请求到后端API
-                // 注意：'/api/convert' 是后端处理转换的API端点，需要与后端实现对应
-                const response = await fetch('/api/convert', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    // 转换成功，处理文件下载
-                    const blob = await response.blob();
-                    const downloadUrl = window.URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = downloadUrl;
-                    // 根据转换类型设置默认文件名后缀
-                    let fileExt = '.xlsx';
-                    if (conversionType === 'ass_to_srt' || conversionType === 'xlsx_to_srt') {
-                        fileExt = '.srt';
-                    }
-                    link.download = file.name.substring(0, file.name.lastIndexOf('.')) + fileExt;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    window.URL.revokeObjectURL(downloadUrl); // 清理URL对象
-
-                    showMessage(languageManager.getText('conversionComplete'), 'success');
-                } else {
-                    // 处理后端返回的错误
-                    const errorText = await response.text();
-                    console.error('转换失败:', response.status, errorText);
-                    showMessage(`${languageManager.getText('conversionFailed')}: ${errorText || '服务器错误'}`, 'danger');
-                }
-            } catch (error) {
-                // 处理网络或其他异常
-                console.error('请求失败:', error);
-                showMessage(`${languageManager.getText('conversionFailed')}: ${error.message}`, 'danger');
-            } finally {
-                // 隐藏加载指示器，恢复表单控件
-                showLoading(false);
-                fileInput.disabled = false;
-                conversionTypeSelect.disabled = false;
-                convertButton.disabled = false;
-            }
-        });
 
         // 显示消息的辅助函数
         function showMessage(message, type = 'info') {
             messageArea.textContent = message;
             messageArea.className = `alert alert-${type}`;
             messageArea.style.display = 'block';
-            // 消息区域变化时，确保屏幕阅读器能读取到
-            messageArea.setAttribute('aria-live', 'assertive');
-            setTimeout(() => {
-                 messageArea.setAttribute('aria-live', 'polite');
-            }, 1000); // 1秒后降级为礼貌提醒
+            
+            // 为成功消息和错误消息添加临时的aria-live属性，确保屏幕阅读器能及时获知重要状态变化
+            if (type === 'success' || type === 'danger') {
+                messageArea.setAttribute('aria-live', 'assertive');
+                // 短暂延时后移除aria-live属性，避免持续推送通知
+                setTimeout(() => {
+                    messageArea.removeAttribute('aria-live');
+                }, 2000); // 2秒后移除
+            }
+            
+            // 成功消息10秒后自动消失
+            if (type === 'success') {
+                setTimeout(() => {
+                    hideMessage();
+                }, 10000); // 10秒后自动隐藏
+            }
         }
 
         // 隐藏消息的辅助函数
@@ -533,6 +783,176 @@
                 loadingIndicator.style.display = 'none';
             }
         }
+
+        // ===== SUP 进度相关函数 =====
+        
+        function showSupProgress(show) {
+            const supProgress = document.getElementById('supProgress');
+            if (supProgress) {
+                supProgress.style.display = show ? 'block' : 'none';
+            }
+        }
+        
+        function updateSupProgress(current, total, message, percentage, data = {}) {
+            const progressBar = document.getElementById('progressBar');
+            const progressMessage = document.getElementById('progressMessage');
+            const phaseTitle = document.getElementById('phaseTitle');
+            const frameProgress = document.getElementById('frameProgress');
+            const subtitleCount = document.getElementById('subtitleCount');
+            
+            // 更新进度条
+            if (progressBar) {
+                progressBar.style.width = percentage + '%';
+                progressBar.setAttribute('aria-valuenow', percentage);
+                progressBar.textContent = percentage + '%';
+            }
+            
+            // 更新阶段标题
+            if (phaseTitle && data.phase) {
+                const currentLang = languageManager.currentLang;
+                const phaseText = languages[currentLang].phases[data.phase] || message;
+                phaseTitle.textContent = phaseText;
+            }
+            
+            // 更新帧进度
+            if (frameProgress && data.current_frame && data.total_frames) {
+                frameProgress.textContent = `${data.current_frame} / ${data.total_frames}`;
+            }
+            
+            // 更新字幕数量
+            if (subtitleCount) {
+                const count = data.subtitle_count || 0;
+                console.log('更新字幕数量:', count, '来源数据:', data);
+                const currentLang = languageManager.currentLang;
+                const countText = currentLang === 'zh-CN' ? `${count} 条` : `${count} items`;
+                subtitleCount.textContent = countText;
+                console.log('字幕数量显示文本:', countText);
+            }
+            
+            // 更新详细消息（对后端消息进行国际化处理）
+            if (progressMessage) {
+                let localizedMessage = message;
+                
+                // 检查是否包含“正在处理第”文本，如果包含则替换为本地化文本
+                if (message.includes('正在处理第') && data.current_frame && data.total_frames) {
+                    const currentLang = languageManager.currentLang;
+                    const template = languages[currentLang].supProgress;
+                    localizedMessage = template.replace('{current}', data.current_frame).replace('{total}', data.total_frames);
+                }
+                // 检查是否包含“解析完成！共提取到”文本，如果包含则替换为本地化文本
+                else if (message.includes('解析完成！共提取到') && data.subtitle_count !== undefined) {
+                    const currentLang = languageManager.currentLang;
+                    const template = languages[currentLang].supComplete;
+                    localizedMessage = template.replace('{count}', data.subtitle_count);
+                }
+                
+                progressMessage.textContent = localizedMessage;
+            }
+        }
+        
+        function startProgressMonitoring(taskId) {
+            console.log('开始监听进度, 任务ID:', taskId);
+            
+            // 使用 Server-Sent Events 监听进度
+            const eventSource = new EventSource(`/api/progress/${taskId}`);
+            
+            eventSource.onopen = function(event) {
+                console.log('SSE连接已建立');
+            };
+            
+            eventSource.onmessage = function(event) {
+                try {
+                    console.log('收到进度数据:', event.data);
+                    const data = JSON.parse(event.data);
+                    
+                    if (data.status === 'processing' || data.status === 'starting') {
+                        console.log('更新进度:', data.percentage + '%', data.message);
+                        updateSupProgress(data.current, data.total, data.message, data.percentage, data);
+                    } else if (data.status === 'complete') {
+                        console.log('转换完成');
+                        updateSupProgress(data.current, data.total, data.message, 100, data);
+                        eventSource.close();
+                        
+                        // 转换完成，自动下载文件
+                        setTimeout(async () => {
+                            try {
+                                const downloadResponse = await fetch(`/api/download/${taskId}`);
+                                if (downloadResponse.ok) {
+                                    const blob = await downloadResponse.blob();
+                                    const downloadUrl = window.URL.createObjectURL(blob);
+                                    const link = document.createElement('a');
+                                    link.href = downloadUrl;
+                                    
+                                    // 从响应头获取文件名
+                                    const contentDisposition = downloadResponse.headers.get('content-disposition');
+                                    let filename = 'converted_file';
+                                    if (contentDisposition) {
+                                        const matches = contentDisposition.match(/filename="(.+)"/);
+                                        if (matches) {
+                                            filename = matches[1];
+                                        }
+                                    }
+                                    
+                                    link.download = filename;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                    window.URL.revokeObjectURL(downloadUrl);
+                                    
+                                    showMessage(languageManager.getText('conversionComplete'), 'success');
+                                } else {
+                                    throw new Error('下载文件失败');
+                                }
+                            } catch (error) {
+                                console.error('下载错误:', error);
+                                showMessage(`${languageManager.getText('conversionFailed')}: ${error.message}`, 'danger');
+                            } finally {
+                                // 恢复控件状态
+                                showLoading(false);
+                                showSupProgress(false);
+                                fileInput.disabled = false;
+                                conversionTypeSelect.disabled = false;
+                                convertButton.disabled = false;
+                            }
+                        }, 500); // 等待500ms确保进度显示完成
+                        
+                    } else if (data.status === 'error') {
+                        console.error('Conversion error:', data.message);
+                        showMessage(`${languageManager.getText('conversionFailed')}: ${data.message}`, 'danger');
+                        eventSource.close();
+                        
+                        // 恢复控件状态
+                        showLoading(false);
+                        showSupProgress(false);
+                        fileInput.disabled = false;
+                        conversionTypeSelect.disabled = false;
+                        convertButton.disabled = false;
+                    } else if (data.status === 'waiting') {
+                        console.log('等待任务开始...');
+                    }
+                } catch (e) {
+                    console.error('Error parsing progress data:', e);
+                }
+            };
+            
+            eventSource.onerror = function(event) {
+                console.error('Progress monitoring error:', event);
+                eventSource.close();
+                
+                // 恢复控件状态
+                showMessage(`${languageManager.getText('conversionFailed')}: 进度监听失败`, 'danger');
+                showLoading(false);
+                showSupProgress(false);
+                fileInput.disabled = false;
+                conversionTypeSelect.disabled = false;
+                convertButton.disabled = false;
+            };
+        }
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
     </script>
 </body>
 </html>
