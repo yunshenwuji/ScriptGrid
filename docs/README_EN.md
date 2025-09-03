@@ -34,12 +34,15 @@ In audio description creation team collaboration, there is often a need to conve
 - **Subtitle to Spreadsheet**: Convert `.ass` and `.srt` formats to structured `.xlsx` spreadsheets
 - **Spreadsheet to Subtitle**: Convert standard format `.xlsx` spreadsheets to `.srt` format
 - **Subtitle Format Interchange**: Convert `.ass` format to the more universal `.srt` format
+- **SUP PGS Support**: Convert `.sup` format image subtitles to `.srt` or `.xlsx` formats
 
 ### ⚙️ Intelligent Recognition and Extraction
 
 - Automatically recognize file types and dynamically display available conversion options
 - Precisely extract key information such as **sequence number, start time, end time, subtitle content** from subtitle files
 - Support for stripping effect tags from `.ass` files, preserving clean text content
+- **SUP Image Recognition**: Automatically recognize image subtitles in SUP format using EasyOCR technology
+- **Intelligent Language Detection**: Automatically detect subtitle language (Chinese/English/Mixed) to optimize OCR recognition
 
 ### 🌐 Modern Web Experience
 
@@ -57,7 +60,7 @@ You can directly visit the website below to start using immediately:
 
 ### Usage Steps
 
-1. **Select File**: Click the "Select Subtitle File" button to upload your file (supports .ass, .srt, .xlsx formats)
+1. **Select File**: Click the "Select Subtitle File" button to upload your file (supports .ass, .srt, .xlsx, .sup formats)
 2. **Choose Conversion Type**: The system will automatically recognize the file type and display available conversion options
 3. **Start Conversion**: Click the "Start Conversion" button
 4. **Download Result**: After conversion is complete, the file will automatically download to your device
@@ -70,6 +73,8 @@ You can directly visit the website below to start using immediately:
 | .ass | .xlsx | ASS subtitle to Excel spreadsheet |
 | .srt | .xlsx | SRT subtitle to Excel spreadsheet |
 | .xlsx | .srt | Excel spreadsheet to SRT subtitle |
+| .sup | .srt | SUP PGS subtitle to SRT format |
+| .sup | .xlsx | SUP PGS subtitle to Excel spreadsheet |
 
 ## 🛠️ Technical Architecture
 
@@ -82,6 +87,7 @@ This project adopts a modern web architecture with front-end and back-end separa
 - **Framework**: [FastAPI](https://fastapi.tiangolo.com/) - High-performance asynchronous web framework
 - **Server**: [Uvicorn](https://www.uvicorn.org/) - ASGI server
 - **Core Library**: [openpyxl](https://openpyxl.readthedocs.io/) - Excel file processing
+- **OCR Recognition**: [EasyOCR](https://github.com/JaidedAI/EasyOCR) - Image text recognition
 
 **Frontend**
 - **Foundation**: HTML5, CSS3, JavaScript (ES6+)
@@ -100,6 +106,8 @@ ScriptGrid/
 ├── parsers.py            # Subtitle file parsers
 ├── writers.py            # File writers
 ├── subtitle_converter.py # Core conversion logic
+├── pgsreader.py          # SUP PGS file parser
+├── imagemaker.py         # Image processing module
 ├── static/               # Static resources
 │   └── index.html        # Frontend page
 ├── templates/            # Template files
@@ -223,7 +231,13 @@ If you encounter problems during use, please:
 
 ## 📝 Changelog
 
-### v1.0.0 (Current)
+### v1.1.0 (Latest)
+- ✨ Added SUP PGS subtitle format support
+- ✨ Integrated EasyOCR technology for image subtitle recognition
+- ✨ Automatic language detection to optimize Chinese and English subtitle recognition
+- ✨ Support for .sup to .srt and .sup to .xlsx format conversion
+
+### v1.0.0
 - ✨ Support .ass/.srt to .xlsx format conversion
 - ✨ Support .xlsx to .srt format conversion
 - ✨ Support .ass to .srt format conversion
