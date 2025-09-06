@@ -38,8 +38,8 @@ COPY . .
 EXPOSE 8000
 
 # 健康检查
-HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8000/api/supported-languages', timeout=5)"
+# HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+#    CMD python -c "import requests; requests.get('http://localhost:8000/api/supported-languages', timeout=5)"
 
 # 启动命令
 # 使用 uvicorn 启动 FastAPI 应用
