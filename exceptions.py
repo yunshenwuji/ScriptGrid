@@ -25,9 +25,13 @@ class SupParseError(ParseError):
     pass
 
 class OcrRecognitionError(ParseError):
-    """OCR识别错误"""
+    """OCR识别错误（支持 PyTorch 和 ONNX Runtime）"""
     pass
 
 class LanguageDetectionError(ParseError):
     """语言检测错误"""
+    pass
+
+class OnnxRuntimeError(OcrRecognitionError):
+    """ONNX Runtime 相关错误"""
     pass
