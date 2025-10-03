@@ -41,7 +41,7 @@
 - 自动识别文件类型并动态显示可用的转换选项
 - 精确提取字幕文件中的**序号、开始时间、结束时间、字幕内容**等关键信息
 - 支持从 `.ass` 文件中剥离特效标签，保留纯净的文本内容
-- **SUP 图像识别**: 使用 EasyOCR 技术自动识别 SUP 格式中的图像字幕
+- **SUP 图像识别**: 使用 TorchfreeEasyOCR + ONNX Runtime 技术自动识别 SUP 格式中的图像字幕
 - **语言智能检测**: 自动检测字幕语言（中文/英文/混合），优化 OCR 识别效果
 
 ### 🌐 现代 Web 体验
@@ -87,7 +87,7 @@
 - **框架**: [FastAPI](https://fastapi.tiangolo.com/) - 高性能异步 Web 框架
 - **服务器**: [Uvicorn](https://www.uvicorn.org/) - ASGI 服务器
 - **核心库**: [openpyxl](https://openpyxl.readthedocs.io/) - Excel 文件处理
-- **OCR 识别**: [EasyOCR](https://github.com/JaidedAI/EasyOCR) - 图像文字识别
+- **OCR 识别**: [TorchfreeEasyOCR](https://github.com/OwenCalvin/torchfree-easyocr) + ONNX Runtime - 高性能图像文字识别
 
 **前端 (Frontend)**
 - **基础**: HTML5, CSS3, JavaScript (ES6+)

@@ -6,18 +6,18 @@
 
 import os
 import re
-from exceptions import ParseError, SupParseError, OcrRecognitionError, LanguageDetectionError
+from exceptions import ParseError, SupParseError, OcrRecognitionError, LanguageDetectionError, OnnxRuntimeError
 
 # SUP PGS 相关导入
 try:
-    import easyocr
+    import torchfree_ocr as ocr_module
     import numpy as np
     from PIL import Image
     from pgsreader import PGSReader
     from imagemaker import make_image
     import constants
 except ImportError as e:
-    print(f"警告: SUP 支持需要额外依赖，请安装: pip install easyocr numpy pillow")
+    print(f"警告: SUP 支持需要额外依赖，请安装: pip install torchfree_ocr onnxruntime")
     print(f"导入错误: {e}")
 
 def parse_srt(file_path):
@@ -56,7 +56,7 @@ def parse_srt(file_path):
 # ====== SUP PGS 支持 ======
 
 class SupOcrEngine:
-    """专用于 SUP 字幕的 OCR 识别引擎"""
+    """专用于 SUP 字幕的 OCR 识别引擎（使用 TorchfreeEasyOCR）"""
     
     def __init__(self, language_codes=None):
         """
@@ -66,25 +66,47 @@ class SupOcrEngine:
         if language_codes is None:
             language_codes = constants.DEFAULT_OCR_LANGUAGES
         
-        self.language_codes = language_codes
-        self.model_path = self._setup_model_directory()
+        # 验证语言代码有效性
+        self.language_codes = self._validate_language_codes(language_codes)
         
         try:
-            # 初始化 EasyOCR 读取器，指定模型存储目录
-            self.reader = easyocr.Reader(
-                self.language_codes, 
-                model_storage_directory=self.model_path,
-                verbose=False  # 减少输出信息
+            # 初始化 TorchfreeEasyOCR 读取器
+            # 注意: torchfree_ocr.Reader 只支持 lang_list 和 recognizer 参数
+            self.reader = ocr_module.Reader(
+                lang_list=self.language_codes,
+                recognizer=True  # 启用识别功能
             )
+        except ImportError as e:
+            raise OcrRecognitionError(f"TorchfreeEasyOCR 模块未安装: {e}") from e
         except Exception as e:
-            raise OcrRecognitionError(f"OCR 引擎初始化失败: {e}") from e
+            # 检查是否为 ONNX Runtime 相关错误
+            error_msg = str(e).lower()
+            if 'onnx' in error_msg or 'onnxruntime' in error_msg:
+                raise OnnxRuntimeError(f"ONNX Runtime 初始化失败: {e}") from e
+            else:
+                raise OcrRecognitionError(f"OCR 引擎初始化失败: {e}") from e
     
-    def _setup_model_directory(self):
-        """设置 EasyOCR 模型目录"""
-        model_dir = constants.OCR_MODEL_DIRECTORY
-        if not os.path.exists(model_dir):
-            os.makedirs(model_dir)
-        return os.path.abspath(model_dir)
+    def _validate_language_codes(self, language_codes):
+        """
+        验证语言代码有效性
+        :param language_codes: 语言代码列表
+        :return: 验证后的语言代码列表
+        """
+        valid_languages = set(constants.SUPPORTED_LANGUAGES.keys()) - {'auto'}  # 移除自动检测
+        validated_codes = []
+        
+        for code in language_codes:
+            if code in valid_languages:
+                validated_codes.append(code)
+            else:
+                print(f"警告: 不支持的语言代码 '{code}'，将被忽略")
+        
+        # 如果没有有效的语言代码，使用默认语言
+        if not validated_codes:
+            print("警告: 没有有效的语言代码，使用默认中英文")
+            validated_codes = constants.DEFAULT_OCR_LANGUAGES
+        
+        return validated_codes
     
     def recognize_subtitle_text(self, image_pil):
         """
@@ -96,18 +118,22 @@ class SupOcrEngine:
             # 图像预处理
             processed_image = self._preprocess_subtitle_image(image_pil)
             
-            # 转换为 numpy 数组以供 EasyOCR 使用
+            # 转换为 numpy 数组以供 TorchfreeEasyOCR 使用
             image_array = np.array(processed_image)
             
-            # OCR 识别
-            results = self.reader.readtext(image_array)
+            # OCR 识别，使用 detail=1 获取详细信息
+            results = self.reader.readtext(image_array, detail=1)
             
             # 文本后处理
             return self._postprocess_ocr_results(results)
             
         except Exception as e:
             # OCR 失败时返回空字符串，而非抛出异常
-            print(f"警告: OCR 识别失败: {e}")
+            error_msg = str(e).lower()
+            if 'onnx' in error_msg or 'onnxruntime' in error_msg:
+                print(f"警告: ONNX Runtime OCR 识别失败: {e}")
+            else:
+                print(f"警告: OCR 识别失败: {e}")
             return ""
     
     def _preprocess_subtitle_image(self, image):
@@ -164,13 +190,13 @@ class SupOcrEngine:
 
 def _detect_subtitle_language(sample_images, max_samples=20):
     """
-    自动检测字幕语言
+    自动棄测字幕语言（使用 TorchfreeEasyOCR）
     :param sample_images: 样本图像列表
     :param max_samples: 最大样本数量（默认20帧）
     :return: 检测到的语言代码列表
     """
     try:
-        # 使用默认语言进行初步检测
+        # 使用默认语言进行初步检测（中英文）
         detector = SupOcrEngine(['ch_sim', 'en'])
         
         chinese_count = 0

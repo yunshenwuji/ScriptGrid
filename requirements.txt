@@ -5,11 +5,10 @@ uvicorn[standard]>=0.30.0,<0.31.0
 openpyxl>=3.1.5,<4.0.0
 python-multipart>=0.0.9,<0.1.0
 
-# SUP PGS 字幕转换相关依赖
-easyocr>=1.7.0
+# SUP PGS 字幕转换相关依赖（使用 TorchfreeEasyOCR 替代 PyTorch）
+torchfree_ocr
+onnxruntime
 numpy>=1.21.0
 Pillow>=9.0.0
-opencv-python>=4.5.0
---extra-index-url https://download.pytorch.org/whl/cpu
-torch>=1.9.0
-torchvision>=0.10.0
+opencv-python-headless>=4.5.0
+python-bidi
