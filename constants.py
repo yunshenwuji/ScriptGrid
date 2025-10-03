@@ -76,30 +76,29 @@ MSG_INFO_SUCCESS_DETAIL_ASS_TO_SRT = "ASS 转 SRT 完成！\n文件已保存至:
 MSG_INFO_SUCCESS_DETAIL_XLSX_TO_SRT = "表格转字幕完成！\n文件已保存至:\n{path}"
 
 # EasyOCR 支持的语言映射（语言代码 -> 显示名称）
+# 基于 TorchfreeEasyOCR 支持的语言，与预置 ONNX 模型对应
 SUPPORTED_LANGUAGES = {
     'auto': '自动检测',
     'ch_sim': '简体中文',
-    'ch_tra': '繁体中文',
+    'ch_tra': '繁体中文', 
     'en': '英语',
     'ja': '日语',
     'ko': '韩语',
     'th': '泰语',
-    'vi': '越南语',
     'ar': '阿拉伯语',
+    'hi': '印地语',
+    'bn': '孟加拉语',
+    'ta': '泰米尔语',
+    'te': '泰卢固语',
+    'kn': '卡纳达语',
     'de': '德语',
     'fr': '法语',
     'ru': '俄语',
-    'es': '西班牙语',
-    'pt': '葡萄牙语',
-    'it': '意大利语',
-    'nl': '荷兰语',
-    'pl': '波兰语',
-    'tr': '土耳其语',
-    'hi': '印地语',
-    'bn': '孟加拉语'
+    'cyrillic': '西里尔字母'
 }
 
 # EasyOCR 支持的语言映射（英文版）
+# 基于 TorchfreeEasyOCR 支持的语言，与预置 ONNX 模型对应
 SUPPORTED_LANGUAGES_EN = {
     'auto': 'Auto Detect',
     'ch_sim': 'Simplified Chinese',
@@ -108,17 +107,14 @@ SUPPORTED_LANGUAGES_EN = {
     'ja': 'Japanese',
     'ko': 'Korean',
     'th': 'Thai',
-    'vi': 'Vietnamese',
     'ar': 'Arabic',
+    'hi': 'Hindi',
+    'bn': 'Bengali',
+    'ta': 'Tamil',
+    'te': 'Telugu',
+    'kn': 'Kannada',
     'de': 'German',
     'fr': 'French',
     'ru': 'Russian',
-    'es': 'Spanish',
-    'pt': 'Portuguese',
-    'it': 'Italian',
-    'nl': 'Dutch',
-    'pl': 'Polish',
-    'tr': 'Turkish',
-    'hi': 'Hindi',
-    'bn': 'Bengali'
+    'cyrillic': 'Cyrillic'
 }

@@ -1,4 +1,4 @@
-# 述格 (ScriptGrid) Web 应用
+# 述格 (ScriptGrid) Web 应用 - TorchfreeEasyOCR 版本
 
 # 使用官方 Python 3.13 slim 基础镜像
 FROM python:3.13-slim
@@ -17,6 +17,8 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libxrender1 \
     libgomp1 \
+    # ONNX Runtime 所需的系统库
+    libprotobuf-dev \
     # 额外的多媒体库支持
     libgstreamer1.0-0 \
     libgstreamer-plugins-base1.0-0 \
