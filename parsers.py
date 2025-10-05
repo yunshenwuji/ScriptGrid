@@ -69,6 +69,47 @@ class SupOcrEngine:
         # 验证语言代码有效性
         self.language_codes = self._validate_language_codes(language_codes)
         
+        # 设置多个可能的模型路径环境变量，确保TorchfreeEasyOCR从/models目录读取模型
+        model_dir = os.path.join(os.getcwd(), constants.OCR_MODEL_DIRECTORY)
+        os.environ['EASYOCR_MODULE_PATH'] = model_dir
+        os.environ['MODULE_PATH'] = model_dir
+        
+        # 设置用户目录下的.TorchfreeOCR目录也指向我们的models目录
+        user_home = os.path.expanduser('~')
+        torchfree_ocr_dir = os.path.join(user_home, '.TorchfreeOCR')
+        if not os.path.exists(torchfree_ocr_dir) or not os.path.islink(torchfree_ocr_dir):
+            try:
+                if os.path.exists(torchfree_ocr_dir) and not os.path.islink(torchfree_ocr_dir):
+                    import shutil
+                    backup_dir = torchfree_ocr_dir + '.backup'
+                    if not os.path.exists(backup_dir):
+                        shutil.move(torchfree_ocr_dir, backup_dir)
+                elif os.path.exists(torchfree_ocr_dir) and os.path.islink(torchfree_ocr_dir):
+                    os.unlink(torchfree_ocr_dir)  # 删除现有符号链接
+                
+                # 创建新的符号链接
+                os.symlink(model_dir, torchfree_ocr_dir, target_is_directory=True)
+                print(f"创建符号链接: {torchfree_ocr_dir} -> {model_dir}")
+            except (OSError, NotImplementedError, PermissionError) as e:
+                print(f"无法创建符号链接: {e}，将使用环境变量")
+        
+        # 尝试在初始化之前动态修改TorchfreeEasyOCR的模型路径
+        try:
+            import torchfree_ocr.torchfree_ocr as tfocr_module
+            # 设置模块级别的模型路径
+            if hasattr(tfocr_module, 'MODULE_PATH'):
+                tfocr_module.MODULE_PATH = model_dir
+            if hasattr(tfocr_module, 'model_storage_directory'):
+                tfocr_module.model_storage_directory = model_dir
+        except ImportError:
+            pass  # 如果无法导入内部模块，就跳过
+        
+        
+        print(f"设置OCR模型路径: {model_dir}")
+        print(f"模型目录存在: {os.path.exists(model_dir)}")
+        if os.path.exists(model_dir):
+            print(f"模型目录内容: {os.listdir(model_dir)}")
+        
         try:
             # 初始化 TorchfreeEasyOCR 读取器
             # 注意: torchfree_ocr.Reader 只支持 lang_list 和 recognizer 参数
@@ -190,12 +231,44 @@ class SupOcrEngine:
 
 def _detect_subtitle_language(sample_images, max_samples=20):
     """
-    自动棄测字幕语言（使用 TorchfreeEasyOCR）
+    自动检测字幕语言（使用 TorchfreeEasyOCR）
     :param sample_images: 样本图像列表
     :param max_samples: 最大样本数量（默认20帧）
     :return: 检测到的语言代码列表
     """
     try:
+        # 设置多个可能的模型路径环境变量，确保TorchfreeEasyOCR从/models目录读取模型
+        model_dir = os.path.join(os.getcwd(), constants.OCR_MODEL_DIRECTORY)
+        os.environ['EASYOCR_MODULE_PATH'] = model_dir
+        os.environ['MODULE_PATH'] = model_dir
+        # 设置用户目录下的.TorchfreeOCR目录也指向我们的models目录
+        user_home = os.path.expanduser('~')
+        torchfree_ocr_dir = os.path.join(user_home, '.TorchfreeOCR')
+        if not os.path.exists(torchfree_ocr_dir) or not os.path.islink(torchfree_ocr_dir):
+            try:
+                if os.path.exists(torchfree_ocr_dir) and not os.path.islink(torchfree_ocr_dir):
+                    import shutil
+                    backup_dir = torchfree_ocr_dir + '.backup'
+                    if not os.path.exists(backup_dir):
+                        shutil.move(torchfree_ocr_dir, backup_dir)
+                elif os.path.exists(torchfree_ocr_dir) and os.path.islink(torchfree_ocr_dir):
+                    os.unlink(torchfree_ocr_dir)  # 删除现有符号链接
+                
+                # 创建新的符号链接
+                os.symlink(model_dir, torchfree_ocr_dir, target_is_directory=True)
+            except (OSError, NotImplementedError, PermissionError):
+                pass  # 忽略符号链接创建失败
+        
+        # 尝试在初始化之前动态修改TorchfreeEasyOCR的模型路径
+        try:
+            import torchfree_ocr.torchfree_ocr as tfocr_module
+            if hasattr(tfocr_module, 'MODULE_PATH'):
+                tfocr_module.MODULE_PATH = model_dir
+            if hasattr(tfocr_module, 'model_storage_directory'):
+                tfocr_module.model_storage_directory = model_dir
+        except ImportError:
+            pass  # 如果无法导入内部模块，就跳过
+        
         # 使用默认语言进行初步检测（中英文）
         detector = SupOcrEngine(['ch_sim', 'en'])
         

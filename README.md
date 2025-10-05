@@ -87,7 +87,7 @@
 - **框架**: [FastAPI](https://fastapi.tiangolo.com/) - 高性能异步 Web 框架
 - **服务器**: [Uvicorn](https://www.uvicorn.org/) - ASGI 服务器
 - **核心库**: [openpyxl](https://openpyxl.readthedocs.io/) - Excel 文件处理
-- **OCR 识别**: [TorchfreeEasyOCR](https://github.com/OwenCalvin/torchfree-easyocr) + ONNX Runtime - 高性能图像文字识别
+- **OCR 识别**: [TorchfreeEasyOCR](https://github.com/SeldonHZ/TorchfreeEasyOCR) + ONNX Runtime - 高性能图像文字识别
 
 **前端 (Frontend)**
 - **基础**: HTML5, CSS3, JavaScript (ES6+)

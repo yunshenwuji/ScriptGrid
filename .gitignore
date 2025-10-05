@@ -212,8 +212,11 @@ __marimo__/
 # included in version control.
 .qoder/
 
-# EasyOCR Models
+# OCR engine Models
 # Exclude all files in the models directory but keep the directory itself
 # This prevents large model files from being committed while preserving the folder structure
 models/*
 !models/.gitkeep
+
+# python虚拟环境
+ScriptGrid/
