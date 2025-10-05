@@ -41,7 +41,7 @@ In audio description creation team collaboration, there is often a need to conve
 - Automatically recognize file types and dynamically display available conversion options
 - Precisely extract key information such as **sequence number, start time, end time, subtitle content** from subtitle files
 - Support for stripping effect tags from `.ass` files, preserving clean text content
-- **SUP Image Recognition**: Automatically recognize image subtitles in SUP format using EasyOCR technology
+- **SUP Image Recognition**: Automatically recognize image subtitles in SUP format using TorchfreeEasyOCR + ONNX Runtime technology
 - **Intelligent Language Detection**: Automatically detect subtitle language (Chinese/English/Mixed) to optimize OCR recognition
 
 ### 🌐 Modern Web Experience
@@ -87,7 +87,7 @@ This project adopts a modern web architecture with front-end and back-end separa
 - **Framework**: [FastAPI](https://fastapi.tiangolo.com/) - High-performance asynchronous web framework
 - **Server**: [Uvicorn](https://www.uvicorn.org/) - ASGI server
 - **Core Library**: [openpyxl](https://openpyxl.readthedocs.io/) - Excel file processing
-- **OCR Recognition**: [EasyOCR](https://github.com/JaidedAI/EasyOCR) - Image text recognition
+- **OCR Recognition**: [TorchfreeEasyOCR](https://github.com/SeldonHZ/TorchfreeEasyOCR) + ONNX Runtime - High-performance image text recognition
 
 **Frontend**
 - **Foundation**: HTML5, CSS3, JavaScript (ES6+)
@@ -233,7 +233,7 @@ If you encounter problems during use, please:
 
 ### v1.1.0 (Latest)
 - ✨ Added SUP PGS subtitle format support
-- ✨ Integrated EasyOCR technology for image subtitle recognition
+- ✨ Integrated TorchfreeEasyOCR technology for image subtitle recognition
 - ✨ Automatic language detection to optimize Chinese and English subtitle recognition
 - ✨ Support for .sup to .srt and .sup to .xlsx format conversion
 
