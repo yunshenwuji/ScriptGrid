@@ -229,7 +229,10 @@
                 
                 // 进度显示标签
                 frameProgressLabel: '当前进度',
-                subtitleCountLabel: '已识别字幕'
+                subtitleCountLabel: '已识别字幕',
+                
+                // 页面关闭确认消息
+                pageCloseConfirm: '正在进行文件转换，离开页面将中断任务。确定要离开吗？'
             },
             
             'en': {
@@ -297,9 +300,151 @@
                 
                 // 进度显示标签
                 frameProgressLabel: 'Current Progress',
-                subtitleCountLabel: 'Recognized Subtitles'
+                subtitleCountLabel: 'Recognized Subtitles',
+                
+                // 页面关闭确认消息
+                pageCloseConfirm: 'File conversion is in progress. Leaving the page will interrupt the task. Are you sure you want to leave?'
             }
         };
+        
+        // ==================== 任务状态管理器 ====================
+        
+        // 任务状态管理器类
+        class TaskStateManager {
+            constructor() {
+                this.isTaskRunning = false;
+                this.confirmOnLeave = false;
+                this.taskType = null; // 当前任务类型
+                this.currentPhase = null; // 当前任务阶段
+            }
+            
+            // 开始任务
+            startTask(taskType = 'general') {
+                console.log('TaskStateManager: 开始任务 -', taskType);
+                this.isTaskRunning = true;
+                this.confirmOnLeave = true;
+                this.taskType = taskType;
+                this.currentPhase = 'starting';
+            }
+            
+            // 结束任务
+            endTask() {
+                console.log('TaskStateManager: 结束任务 -', this.taskType);
+                this.isTaskRunning = false;
+                this.confirmOnLeave = false;
+                this.taskType = null;
+                this.currentPhase = null;
+            }
+            
+            // 检查是否应该显示关闭确认
+            shouldConfirmLeave() {
+                return this.confirmOnLeave && this.isTaskRunning;
+            }
+            
+            // 获取确认消息
+            getConfirmMessage() {
+                // 如果语言管理器存在，使用国际化文本
+                if (typeof languageManager !== 'undefined' && languageManager) {
+                    return languageManager.getText('pageCloseConfirm');
+                }
+                
+                // 默认中文消息
+                return '正在进行文件转换，离开页面将中断任务。确定要离开吗？';
+            }
+            
+            // 更新任务阶段
+            updatePhase(phase) {
+                console.log('TaskStateManager: 更新任务阶段 -', phase);
+                this.currentPhase = phase;
+            }
+            
+            // 获取当前状态信息
+            getStatusInfo() {
+                return {
+                    isTaskRunning: this.isTaskRunning,
+                    confirmOnLeave: this.confirmOnLeave,
+                    taskType: this.taskType,
+                    currentPhase: this.currentPhase
+                };
+            }
+        }
+        
+        // ==================== 页面关闭确认处理器 ====================
+        
+        // 页面关闭确认处理器类
+        class PageCloseHandler {
+            constructor(taskManager, languageManager) {
+                this.taskManager = taskManager;
+                this.languageManager = languageManager;
+                this.isInitialized = false;
+            }
+            
+            // 初始化处理器
+            initialize() {
+                if (this.isInitialized) {
+                    console.log('PageCloseHandler: 已初始化，跳过重复初始化');
+                    return;
+                }
+                
+                console.log('PageCloseHandler: 初始化页面关闭确认处理器');
+                this.bindEvents();
+                this.isInitialized = true;
+            }
+            
+            // 绑定事件监听
+            bindEvents() {
+                // 绑定 beforeunload 事件
+                window.addEventListener('beforeunload', (event) => {
+                    return this.handleBeforeUnload(event);
+                });
+                
+                // 绑定 unload 事件（清理）
+                window.addEventListener('unload', () => {
+                    this.cleanup();
+                });
+                
+                console.log('PageCloseHandler: 事件监听器已绑定');
+            }
+            
+            // 处理页面关闭前事件
+            handleBeforeUnload(event) {
+                if (this.taskManager.shouldConfirmLeave()) {
+                    const confirmMessage = this.taskManager.getConfirmMessage();
+                    console.log('PageCloseHandler: 显示关闭确认 -', confirmMessage);
+                    
+                    // 标准做法：设置 returnValue 并返回字符串
+                    event.preventDefault();
+                    event.returnValue = confirmMessage;
+                    return confirmMessage;
+                }
+                
+                console.log('PageCloseHandler: 允许正常关闭页面');
+                // 任务未运行，允许正常关闭
+                return undefined;
+            }
+            
+            // 清理资源
+            cleanup() {
+                console.log('PageCloseHandler: 清理资源');
+                // 页面卸载时清理任务状态
+                if (this.taskManager) {
+                    this.taskManager.endTask();
+                }
+            }
+            
+            // 手动触发确认（用于调试）
+            testConfirm() {
+                if (this.taskManager.shouldConfirmLeave()) {
+                    const message = this.taskManager.getConfirmMessage();
+                    return confirm(message);
+                }
+                return true;
+            }
+        }
+        
+        // 全局实例
+        let taskStateManager;
+        let pageCloseHandler;
         
         // 语言管理类
         class LanguageManager {
@@ -504,6 +649,13 @@
             // 初始化语言管理器
             languageManager = new LanguageManager();
             
+            // 初始化任务状态管理器
+            taskStateManager = new TaskStateManager();
+            
+            // 初始化页面关闭确认处理器
+            pageCloseHandler = new PageCloseHandler(taskStateManager, languageManager);
+            pageCloseHandler.initialize();
+            
             // 绑定事件监听器
             bindEventListeners();
             
@@ -574,13 +726,19 @@
                     return;
                 }
 
+                // 启动任务状态管理
+                const isSupConversion = conversionType.startsWith('sup_');
+                const taskType = isSupConversion ? 'sup_conversion' : 'general_conversion';
+                taskStateManager.startTask(taskType);
+                console.log('开始转换任务:', taskType);
+
                 // 准备FormData用于文件上传
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('conversion_type', conversionType);
                 
                 // 如果是SUP转换，添加语言参数
-                if (conversionType.startsWith('sup_')) {
+                if (isSupConversion) {
                     const targetLanguage = targetLanguageSelect.value || 'auto';
                     formData.append('target_language', targetLanguage);
                 }
@@ -592,9 +750,9 @@
                 convertButton.disabled = true;
 
                 // 检查是否为SUP转换，如果是则显示进度
-                const isSupConversion = conversionType.startsWith('sup_');
                 if (isSupConversion) {
                     showSupProgress(true);
+                    taskStateManager.updatePhase('file_upload');
                 }
 
                 try {
@@ -619,12 +777,14 @@
                             if (taskId) {
                                 // 启动进度监听
                                 console.log('开始监听任务进度:', taskId);
+                                taskStateManager.updatePhase('ocr_processing');
                                 startProgressMonitoring(taskId);
                             } else {
                                 throw new Error('未获取到任务ID');
                             }
                         } else {
                             // 其他转换：同步模式，直接下载
+                            taskStateManager.updatePhase('download');
                             const taskId = response.headers.get('X-Task-ID');
                             
                             // 转换成功，处理文件下载
@@ -644,17 +804,23 @@
                             window.URL.revokeObjectURL(downloadUrl); // 清理URL对象
 
                             showMessage(languageManager.getText('conversionComplete'), 'success');
+                            // 同步转换完成，结束任务
+                            taskStateManager.endTask();
                         }
                     } else {
                         // 处理后端返回的错误
                         const errorText = await response.text();
                         console.error('转换失败:', response.status, errorText);
                         showMessage(`${languageManager.getText('conversionFailed')}: ${errorText || '服务器错误'}`, 'danger');
+                        // 转换失败，结束任务
+                        taskStateManager.endTask();
                     }
                 } catch (error) {
                     // 处理网络或其他异常
                     console.error('请求失败:', error);
                     showMessage(`${languageManager.getText('conversionFailed')}: ${error.message}`, 'danger');
+                    // 请求异常，结束任务
+                    taskStateManager.endTask();
                 } finally {
                     // 只有非-SUP转换才立即恢复控件
                     if (!isSupConversion) {
@@ -867,9 +1033,17 @@
                     
                     if (data.status === 'processing' || data.status === 'starting') {
                         console.log('更新进度:', data.percentage + '%', data.message);
+                        // 更新任务阶段
+                        if (data.phase && taskStateManager) {
+                            taskStateManager.updatePhase(data.phase);
+                        }
                         updateSupProgress(data.current, data.total, data.message, data.percentage, data);
                     } else if (data.status === 'complete') {
                         console.log('转换完成');
+                        // 更新最终阶段
+                        if (taskStateManager) {
+                            taskStateManager.updatePhase('complete');
+                        }
                         updateSupProgress(data.current, data.total, data.message, 100, data);
                         eventSource.close();
                         
@@ -907,7 +1081,10 @@
                                 console.error('下载错误:', error);
                                 showMessage(`${languageManager.getText('conversionFailed')}: ${error.message}`, 'danger');
                             } finally {
-                                // 恢复控件状态
+                                // SUP转换完成，结束任务并恢复控件状态
+                                if (taskStateManager) {
+                                    taskStateManager.endTask();
+                                }
                                 showLoading(false);
                                 showSupProgress(false);
                                 fileInput.disabled = false;
@@ -921,7 +1098,10 @@
                         showMessage(`${languageManager.getText('conversionFailed')}: ${data.message}`, 'danger');
                         eventSource.close();
                         
-                        // 恢复控件状态
+                        // SUP转换失败，结束任务并恢复控件状态
+                        if (taskStateManager) {
+                            taskStateManager.endTask();
+                        }
                         showLoading(false);
                         showSupProgress(false);
                         fileInput.disabled = false;
@@ -929,6 +1109,10 @@
                         convertButton.disabled = false;
                     } else if (data.status === 'waiting') {
                         console.log('等待任务开始...');
+                        // 更新任务阶段为等待
+                        if (taskStateManager) {
+                            taskStateManager.updatePhase('waiting');
+                        }
                     }
                 } catch (e) {
                     console.error('Error parsing progress data:', e);
@@ -939,7 +1123,10 @@
                 console.error('Progress monitoring error:', event);
                 eventSource.close();
                 
-                // 恢复控件状态
+                // 进度监听失败，结束任务并恢复控件状态
+                if (taskStateManager) {
+                    taskStateManager.endTask();
+                }
                 showMessage(`${languageManager.getText('conversionFailed')}: 进度监听失败`, 'danger');
                 showLoading(false);
                 showSupProgress(false);
@@ -948,6 +1135,56 @@
                 convertButton.disabled = false;
             };
         }
+        
+        
+        // ==================== 调试工具函数 ====================
+        
+        // 为开发者提供的全局调试接口
+        window.ScriptGridDebug = {
+            // 获取任务状态
+            getTaskStatus: () => {
+                if (taskStateManager) {
+                    return taskStateManager.getStatusInfo();
+                }
+                return { error: 'TaskStateManager 未初始化' };
+            },
+            
+            // 手动启动测试任务
+            startTestTask: (type = 'test') => {
+                if (taskStateManager) {
+                    taskStateManager.startTask(type);
+                    console.log('测试任务已启动:', type);
+                    return true;
+                }
+                return false;
+            },
+            
+            // 手动结束任务
+            endTestTask: () => {
+                if (taskStateManager) {
+                    taskStateManager.endTask();
+                    console.log('测试任务已结束');
+                    return true;
+                }
+                return false;
+            },
+            
+            // 测试确认对话框
+            testConfirm: () => {
+                if (pageCloseHandler) {
+                    return pageCloseHandler.testConfirm();
+                }
+                return false;
+            },
+            
+            // 获取确认消息
+            getConfirmMessage: () => {
+                if (taskStateManager) {
+                    return taskStateManager.getConfirmMessage();
+                }
+                return null;
+            }
+        };
         
         // 页面加载时初始化
         document.addEventListener('DOMContentLoaded', function() {
