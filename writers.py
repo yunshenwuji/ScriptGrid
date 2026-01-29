@@ -65,11 +65,16 @@ def parse_xlsx(file_path):
         wb = load_workbook(filename=file_path, read_only=True)
         ws = wb.active
 
-        # 检查表头
+        # 检查表头（只检查前4列，忽略后面可能存在的空列）
         header_row = [cell.value for cell in next(ws.iter_rows())]
         expected_header = constants.EXCEL_HEADERS
-        if header_row != expected_header:
+        expected_len = len(expected_header)
+        # 确保至少有4列
+        if len(header_row) < expected_len:
             raise ParseError(constants.MSG_WARNING_INCORRECT_HEADER.format(expected=expected_header, actual=header_row))
+        # 只比较前4列，忽略后面的冗余列
+        if header_row[:expected_len] != expected_header:
+            raise ParseError(constants.MSG_WARNING_INCORRECT_HEADER.format(expected=expected_header, actual=header_row[:expected_len]))
 
         data = []
         # 从第二行开始迭代数据行
