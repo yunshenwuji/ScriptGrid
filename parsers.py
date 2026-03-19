@@ -34,7 +34,8 @@ def parse_srt(file_path):
 
         # 定义一个强大的正则表达式来匹配一个完整的SRT字幕块
         # re.DOTALL 标志让 '.' 可以匹配包括换行符在内的任意字符
-        pattern = re.compile(r'(\d+)\n(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})\n(.*?)\n\n', re.DOTALL)
+        # 修改正则表达式以正确处理文件末尾的情况
+        pattern = re.compile(r'(\d+)\n(\d{2}:\d{2}:\d{2},\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2},\d{3})\n(.*?)(?:\n\n|\n?$)', re.DOTALL)
         # 找到所有匹配项
         matches = pattern.findall(content)
 
@@ -44,8 +45,8 @@ def parse_srt(file_path):
             index = match[0]
             start_time = match[1]
             end_time = match[2]
-            # 将可能存在的多行字幕文本合并为一行，用空格分隔
-            text = ' '.join(match[3].replace('\r\n', '\n').split('\n'))
+            # 保持原始的换行符，不将其替换为空格
+            text = match[3].replace('\r\n', '\n')
             data.append([index, start_time, end_time, text])
 
         return data
@@ -580,8 +581,8 @@ def parse_ass_to_srt_structure(file_path):
                 raw_text = parts[format_map['text']]
                 # 使用正则表达式清除ASS特效标签，如 {\fad(200,200)} 或 {\an8}
                 clean_text = re.sub(r'\{.*?\}', '', raw_text)
-                # ASS中的换行符是 \N 或 \n，都替换为空格
-                clean_text = clean_text.replace('\\N', ' ').replace('\\n', ' ')
+                # 保持ASS中的换行符 \N 和 \n，不替换为空格
+                # clean_text = clean_text.replace('\\N', ' ').replace('\\n', ' ')
 
                 # 将处理好的数据存入列表，格式与SRT解析结果统一
                 data.append([str(dialogue_count), start_time, end_time, clean_text])
