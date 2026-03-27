@@ -581,8 +581,8 @@ def parse_ass_to_srt_structure(file_path):
                 raw_text = parts[format_map['text']]
                 # 使用正则表达式清除ASS特效标签，如 {\fad(200,200)} 或 {\an8}
                 clean_text = re.sub(r'\{.*?\}', '', raw_text)
-                # 保持ASS中的换行符 \N 和 \n，不替换为空格
-                # clean_text = clean_text.replace('\\N', ' ').replace('\\n', ' ')
+                # 将ASS中的换行符 \N 和 \n 转换为实际的换行符
+                clean_text = clean_text.replace('\\N', '\n').replace('\\n', '\n')
 
                 # 将处理好的数据存入列表，格式与SRT解析结果统一
                 data.append([str(dialogue_count), start_time, end_time, clean_text])
