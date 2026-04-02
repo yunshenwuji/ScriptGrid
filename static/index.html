@@ -86,7 +86,7 @@
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary" id="convertBtn" disabled data-i18n="convertButton">开始转换</button>
+                        <button type="submit" class="btn btn-primary" id="convertBtn" disabled data-i18n="convertButton">开始处理</button>
                     </div>
                 </form>
 
@@ -175,7 +175,7 @@
                 conversionLabel: '转换类型',
                 selectFile: '请先选择文件',
                 selectConversion: '请选择转换类型',
-                convertButton: '开始转换',
+                convertButton: '开始处理',
                 
                 // 转换选项
                 assToSrt: 'ASS 转 SRT (.ass -> .srt)',
@@ -218,6 +218,10 @@
                 supProgress: '正在处理第 {current} / {total} 帧...',
                 supComplete: '转换完成！共处理 {count} 条字幕',
                 
+                // 口述稿自动打轴
+                auto_narration_timing: '空白口述稿自动打轴',
+                narration_placeholder: '请填写口述文本',
+                
                 // SUP 转换阶段
                 phases: {
                     file_parsing: '正在解析SUP文件...',
@@ -246,7 +250,7 @@
                 conversionLabel: 'Conversion Type',
                 selectFile: 'Please select a file first',
                 selectConversion: 'Please select conversion type',
-                convertButton: 'Start Conversion',
+                convertButton: 'Start Processing',
                 
                 // 转换选项
                 assToSrt: 'ASS to SRT (.ass -> .srt)',
@@ -288,6 +292,10 @@
                 supProcessing: 'Converting SUP file, please wait...',
                 supProgress: 'Processing frame {current} / {total}...',
                 supComplete: 'Conversion complete! Processed {count} subtitles',
+                
+                // Auto narration timing
+                auto_narration_timing: 'Auto Narration Timing',
+                narration_placeholder: 'Please enter narration text',
                 
                 // SUP 转换阶段
                 phases: {
@@ -592,6 +600,9 @@
                         case 'sup_to_excel':
                             textKey = 'supToExcel';
                             break;
+                        case 'auto_narration_timing':
+                            textKey = 'auto_narration_timing';
+                            break;
                     }
                     
                     if (textKey && languages[this.currentLang][textKey]) {
@@ -633,6 +644,7 @@
         // 获取DOM元素（在DOMContentLoaded事件中获取）
         let fileInput, conversionTypeSelect, convertButton, form, messageArea, loadingIndicator;
         let languageSelectionContainer, targetLanguageSelect;
+        let fileExtension = '';
         
         // 初始化函数
         function initializeApp() {
@@ -670,7 +682,7 @@
                 const file = this.files[0];
                 if (file) {
                     const fileName = file.name;
-                    const fileExtension = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
+                    fileExtension = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
 
                     // 重置并更新转换类型下拉框
                     conversionTypeSelect.innerHTML = `<option value="" selected>${languageManager.getText('selectFile')}</option>`;
@@ -727,7 +739,9 @@
                 }
 
                 // 启动任务状态管理
-                const isSupConversion = conversionType.startsWith('sup_');
+                // SUP转换或SUP文件的auto_narration_timing转换都需要走异步流程
+                const isSupConversion = conversionType.startsWith('sup_') || 
+                                       (fileExtension === '.sup' && conversionType === 'auto_narration_timing');
                 const taskType = isSupConversion ? 'sup_conversion' : 'general_conversion';
                 taskStateManager.startTask(taskType);
                 console.log('开始转换任务:', taskType);
@@ -741,6 +755,11 @@
                 if (isSupConversion) {
                     const targetLanguage = targetLanguageSelect.value || 'auto';
                     formData.append('target_language', targetLanguage);
+                }
+                
+                // 当转换类型为 auto_narration_timing 时，传递占位符文本
+                if (conversionType === 'auto_narration_timing') {
+                    formData.append('placeholder_text', languages[languageManager.currentLang].narration_placeholder);
                 }
 
                 // 显示加载指示器，禁用表单控件
@@ -794,7 +813,7 @@
                             link.href = downloadUrl;
                             // 根据转换类型设置默认文件名后缀
                             let fileExt = '.xlsx';
-                            if (conversionType === 'ass_to_srt' || conversionType === 'xlsx_to_srt' || conversionType === 'sup_to_srt') {
+                            if (conversionType === 'ass_to_srt' || conversionType === 'xlsx_to_srt' || conversionType === 'sup_to_srt' || conversionType === 'auto_narration_timing') {
                                 fileExt = '.srt';
                             }
                             link.download = file.name.substring(0, file.name.lastIndexOf('.')) + fileExt;
@@ -898,17 +917,20 @@
             return {
                 '.ass': [
                     { value: 'ass_to_srt', getText: () => languageManager.getText('assToSrt') },
-                    { value: 'subtitle_to_excel', getText: () => languageManager.getText('subtitleToExcel') }
+                    { value: 'subtitle_to_excel', getText: () => languageManager.getText('subtitleToExcel') },
+                    { value: 'auto_narration_timing', getText: () => languageManager.getText('auto_narration_timing') }
                 ],
                 '.srt': [
-                    { value: 'subtitle_to_excel', getText: () => languageManager.getText('srtToExcel') }
+                    { value: 'subtitle_to_excel', getText: () => languageManager.getText('srtToExcel') },
+                    { value: 'auto_narration_timing', getText: () => languageManager.getText('auto_narration_timing') }
                 ],
                 '.xlsx': [
                     { value: 'xlsx_to_srt', getText: () => languageManager.getText('xlsxToSrt') }
                 ],
                 '.sup': [
                     { value: 'sup_to_srt', getText: () => languageManager.getText('supToSrt') },
-                    { value: 'sup_to_excel', getText: () => languageManager.getText('supToExcel') }
+                    { value: 'sup_to_excel', getText: () => languageManager.getText('supToExcel') },
+                    { value: 'auto_narration_timing', getText: () => languageManager.getText('auto_narration_timing') }
                 ]
             };
         }

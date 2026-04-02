@@ -35,6 +35,7 @@ In audio description creation team collaboration, there is often a need to conve
 - **Spreadsheet to Subtitle**: Convert standard format `.xlsx` spreadsheets to `.srt` format
 - **Subtitle Format Interchange**: Convert `.ass` format to the more universal `.srt` format
 - **SUP PGS Support**: Convert `.sup` format image subtitles to `.srt` or `.xlsx` formats
+- **Auto Narration Timing**: Automatically analyzes dialogue subtitle files (SRT/ASS/SUP) to identify gaps without dialogue, generating narration subtitle timeline templates for audio description professionals
 
 ### ⚙️ Intelligent Recognition and Extraction
 
@@ -75,6 +76,18 @@ You can directly visit the website below to start using immediately:
 | .xlsx | .srt | Excel spreadsheet to SRT subtitle |
 | .sup | .srt | SUP PGS subtitle to SRT format |
 | .sup | .xlsx | SUP PGS subtitle to Excel spreadsheet |
+| .srt/.ass/.sup | .srt | Auto Narration Timing - generates narration subtitle with placeholder text |
+
+### Auto Narration Timing
+
+**Usage:**
+1. Upload dialogue subtitle file (supports SRT/ASS/SUP formats)
+2. Select "Auto Narration Timing"
+3. Automatically generates SRT narration subtitle with placeholder text
+
+**Technical Details:**
+- 500ms gap between narration and adjacent dialogue
+- Minimum 1-second duration per narration entry, with no maximum limit
 
 ## 🛠️ Technical Architecture
 

@@ -203,6 +203,7 @@ async def convert_subtitle_file(
     file: UploadFile = File(...),
     conversion_type: str = Form(...),
     target_language: str = Form(default="auto"),  # 新增语言参数
+    placeholder_text: str = Form(default="请填写口述文本"),  # 口述稿占位文本
     background_tasks: BackgroundTasks = None  # FastAPI 特殊注入类型
 ):
     """
@@ -210,8 +211,9 @@ async def convert_subtitle_file(
     
     Args:
         file (UploadFile): 用户上传的文件。
-        conversion_type (str): 转换类型 ('subtitle_to_excel', 'ass_to_srt', 'xlsx_to_srt', 'sup_to_srt', 'sup_to_excel')。
+        conversion_type (str): 转换类型 ('subtitle_to_excel', 'ass_to_srt', 'xlsx_to_srt', 'sup_to_srt', 'sup_to_excel', 'auto_narration_timing')。
         target_language (str): 目标语言（仅对SUP转换有效，默认'auto'自动检测）。
+        placeholder_text (str): 口述稿占位文本（仅对 auto_narration_timing 有效）。
         background_tasks (BackgroundTasks): FastAPI 的后台任务对象，用于延迟清理。
         
     Returns:
@@ -231,7 +233,7 @@ async def convert_subtitle_file(
         logger.error("No conversion type provided in the request.")
         raise HTTPException(status_code=400, detail="未提供转换类型。")
         
-    if conversion_type not in ['subtitle_to_excel', 'ass_to_srt', 'xlsx_to_srt', 'sup_to_srt', 'sup_to_excel']:
+    if conversion_type not in ['subtitle_to_excel', 'ass_to_srt', 'xlsx_to_srt', 'sup_to_srt', 'sup_to_excel', 'auto_narration_timing']:
         logger.error(f"Unsupported conversion type provided: {conversion_type}")
         raise HTTPException(status_code=400, detail=f"不支持的转换类型: {conversion_type}")
 
@@ -256,6 +258,10 @@ async def convert_subtitle_file(
         logger.error(f"File extension '{file_extension}' is invalid for SUP conversion.")
         raise HTTPException(status_code=400, detail="SUP 转换功能仅支持 .sup 文件。")
 
+    if conversion_type == 'auto_narration_timing' and file_extension not in ['.srt', '.ass', '.sup']:
+        logger.error(f"File extension '{file_extension}' is invalid for 'auto_narration_timing'.")
+        raise HTTPException(status_code=400, detail="自动口述稿功能仅支持 .srt、.ass 和 .sup 文件。")
+
     # 2. 创建临时目录用于存放上传和输出文件
     temp_dir = Path(tempfile.mkdtemp())
     
@@ -273,6 +279,8 @@ async def convert_subtitle_file(
             output_file_name = f"{original_stem}.xlsx"
         elif conversion_type in ['ass_to_srt', 'xlsx_to_srt', 'sup_to_srt']:
             output_file_name = f"{original_stem}.srt"
+        elif conversion_type == 'auto_narration_timing':
+            output_file_name = f"narration_{original_stem}.srt"
         else:
             # 默认处理，理论上不应该达到这里
             raise HTTPException(status_code=500, detail=f"未知的转换类型: {conversion_type}")
@@ -324,7 +332,8 @@ async def convert_subtitle_file(
         }
         
         # 根据转换类型调用不同的转换函数
-        if conversion_type in ['sup_to_srt', 'sup_to_excel']:
+        if conversion_type in ['sup_to_srt', 'sup_to_excel'] or \
+           (conversion_type == 'auto_narration_timing' and file_extension == '.sup'):
             # SUP 转换：异步执行，立即返回任务ID
             import threading
             
@@ -336,7 +345,8 @@ async def convert_subtitle_file(
                         str(output_file_path), 
                         conversion_type, 
                         progress_callback,
-                        target_language=target_language if target_language != "auto" else None
+                        target_language=target_language if target_language != "auto" else None,
+                        placeholder_text=placeholder_text
                     )
                     
                     # 标记完成
@@ -371,7 +381,7 @@ async def convert_subtitle_file(
             
         else:
             # 其他转换类型：同步执行
-            subtitle_converter.convert(str(input_file_path), str(output_file_path), conversion_type)
+            subtitle_converter.convert(str(input_file_path), str(output_file_path), conversion_type, placeholder_text=placeholder_text)
             
             # 标记完成
             conversion_progress[task_id] = {
