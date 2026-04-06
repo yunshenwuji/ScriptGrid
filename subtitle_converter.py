@@ -5,10 +5,6 @@
 负责协调解析和写入过程。
 """
 
-# Note: This file is largely unchanged from the original, 
-# but we ensure it's compatible with being called by the web backend.
-# The main change is to make path handling more robust and add logging.
-
 import os
 import logging
 from typing import List
@@ -21,6 +17,13 @@ if not logger.handlers:
     formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
     handler.setFormatter(formatter)
     logger.addHandler(handler)
+
+
+# Import local modules
+from parsers import parse_srt, parse_ass_to_srt_structure, parse_sup_to_srt_structure, parse_xlsx
+from writers import write_to_excel, write_to_srt
+from exceptions import SubtitleConverterError, ParseError, WriteError
+import constants
 
 
 def srt_time_to_ms(time_str: str) -> int:
@@ -110,12 +113,104 @@ def generate_narration_timing(subtitles: List[List[str]], placeholder_text: str 
     
     return narration_segments
 
-# Import local modules
-# We assume these are in the same directory or PYTHONPATH
-from parsers import parse_srt, parse_ass_to_srt_structure, parse_sup_to_srt_structure
-from writers import write_to_excel, write_to_srt, parse_xlsx
-from exceptions import SubtitleConverterError, ParseError, WriteError
-import constants
+
+def _parse_input_file(input_path: str, conversion_type: str, progress_callback=None, target_language=None) -> List[List[str]]:
+    """
+    统一的解析阶段逻辑
+    :param input_path: 输入文件路径
+    :param conversion_type: 转换类型
+    :param progress_callback: 进度回调函数(可选)
+    :param target_language: 目标语言(仅SUP转换)
+    :return: 解析后的字幕数据
+    """
+    data: List[List[str]] = []
+    
+    # SRT/ASS -> Excel
+    if conversion_type == 'subtitle_to_excel':
+        if input_path.lower().endswith('.srt'):
+            data = parse_srt(input_path)
+        elif input_path.lower().endswith('.ass'):
+            data = parse_ass_to_srt_structure(input_path)
+        else:
+            raise SubtitleConverterError(constants.MSG_WARNING_UNSUPPORTED_FORMAT)
+    
+    # ASS -> SRT
+    elif conversion_type == 'ass_to_srt':
+        if input_path.lower().endswith('.ass'):
+            data = parse_ass_to_srt_structure(input_path)
+        else:
+            raise SubtitleConverterError("输入文件必须是 .ass 格式。")
+    
+    # XLSX -> SRT
+    elif conversion_type == 'xlsx_to_srt':
+        if input_path.lower().endswith('.xlsx'):
+            data = parse_xlsx(input_path)
+        else:
+            raise SubtitleConverterError("输入文件必须是 .xlsx 格式。")
+    
+    # SUP -> SRT/Excel (支持进度回调)
+    elif conversion_type in ['sup_to_srt', 'sup_to_excel']:
+        if input_path.lower().endswith('.sup'):
+            data = parse_sup_to_srt_structure(
+                input_path, 
+                target_language=target_language, 
+                progress_callback=progress_callback
+            )
+        else:
+            raise SubtitleConverterError("输入文件必须是 .sup 格式。")
+    
+    # 自动口述稿打轴
+    elif conversion_type == 'auto_narration_timing':
+        if input_path.lower().endswith('.srt'):
+            data = parse_srt(input_path)
+        elif input_path.lower().endswith('.ass'):
+            data = parse_ass_to_srt_structure(input_path)
+        elif input_path.lower().endswith('.sup'):
+            data = parse_sup_to_srt_structure(
+                input_path, 
+                target_language=target_language, 
+                progress_callback=progress_callback
+            )
+        else:
+            raise SubtitleConverterError("自动口述稿功能仅支持 .srt、.ass 和 .sup 文件。")
+    
+    else:
+        raise SubtitleConverterError(f"不支持的转换类型: {conversion_type}")
+    
+    # 检查解析结果
+    if not data:
+        logger.warning("No data parsed from the input file.")
+        raise SubtitleConverterError(constants.MSG_WARNING_NO_DATA_PARSED)
+    
+    return data
+
+
+def _write_output_file(data: List[List[str]], output_path: str, conversion_type: str, placeholder_text: str = "请填写口述文本") -> None:
+    """
+    统一的写入阶段逻辑
+    :param data: 字幕数据
+    :param output_path: 输出文件路径
+    :param conversion_type: 转换类型
+    :param placeholder_text: 口述稿占位文本
+    """
+    # 转Excel
+    if conversion_type in ['subtitle_to_excel', 'sup_to_excel']:
+        write_to_excel(data, output_path)
+    
+    # 转SRT
+    elif conversion_type in ['ass_to_srt', 'xlsx_to_srt', 'sup_to_srt']:
+        write_to_srt(data, output_path)
+    
+    # 自动口述稿打轴
+    elif conversion_type == 'auto_narration_timing':
+        narration_data = generate_narration_timing(data, placeholder_text)
+        if not narration_data:
+            logger.warning("No narration timing generated from the input file.")
+            raise SubtitleConverterError("没有生成口述稿时间轴，可能没有足够的空白时间段。")
+        write_to_srt(narration_data, output_path)
+    
+    else:
+        raise SubtitleConverterError(f"不支持的转换类型: {conversion_type}")
 
 
 def convert(input_path: str, output_path: str, conversion_type: str, placeholder_text: str = "请填写口述文本") -> None:
@@ -134,73 +229,16 @@ def convert(input_path: str, output_path: str, conversion_type: str, placeholder
     :raises SubtitleConverterError: 转换过程中发生的任何错误。
     """
     logger.info(f"Starting conversion: {input_path} -> {output_path} (type: {conversion_type})")
-    data: List[List[str]] = []
+    
     try:
-        # --- 1. 解析阶段 ---
-        if conversion_type == 'subtitle_to_excel':
-            if input_path.lower().endswith('.srt'):
-                data = parse_srt(input_path)
-            elif input_path.lower().endswith('.ass'):
-                data = parse_ass_to_srt_structure(input_path)
-            else:
-                raise SubtitleConverterError(constants.MSG_WARNING_UNSUPPORTED_FORMAT)
-
-        elif conversion_type == 'ass_to_srt':
-            if input_path.lower().endswith('.ass'):
-                data = parse_ass_to_srt_structure(input_path)
-            else:
-                raise SubtitleConverterError("输入文件必须是 .ass 格式。")
-
-        elif conversion_type == 'xlsx_to_srt':
-            if input_path.lower().endswith('.xlsx'):
-                data = parse_xlsx(input_path)
-            else:
-                raise SubtitleConverterError("输入文件必须是 .xlsx 格式。")
-
-        elif conversion_type == 'sup_to_srt':
-            if input_path.lower().endswith('.sup'):
-                data = parse_sup_to_srt_structure(input_path)
-            else:
-                raise SubtitleConverterError("输入文件必须是 .sup 格式。")
-
-        elif conversion_type == 'sup_to_excel':
-            if input_path.lower().endswith('.sup'):
-                data = parse_sup_to_srt_structure(input_path)
-            else:
-                raise SubtitleConverterError("输入文件必须是 .sup 格式。")
-
-        elif conversion_type == 'auto_narration_timing':
-            if input_path.lower().endswith('.srt'):
-                data = parse_srt(input_path)
-            elif input_path.lower().endswith('.ass'):
-                data = parse_ass_to_srt_structure(input_path)
-            else:
-                raise SubtitleConverterError("自动口述稿功能仅支持 .srt 和 .ass 文件。")
-
-        else:
-            raise SubtitleConverterError(f"不支持的转换类型: {conversion_type}")
-
-        # --- 2. 检查解析结果 ---
-        if not data:
-            logger.warning("No data parsed from the input file.")
-            raise SubtitleConverterError(constants.MSG_WARNING_NO_DATA_PARSED)
-
-        # --- 3. 写入阶段 ---
-        if conversion_type == 'subtitle_to_excel':
-            write_to_excel(data, output_path)
-        elif conversion_type in ['ass_to_srt', 'xlsx_to_srt', 'sup_to_srt']:
-            write_to_srt(data, output_path)
-        elif conversion_type == 'sup_to_excel':
-            write_to_excel(data, output_path)
-        elif conversion_type == 'auto_narration_timing':
-            narration_data = generate_narration_timing(data, placeholder_text)
-            if not narration_data:
-                logger.warning("No narration timing generated from the input file.")
-                raise SubtitleConverterError("没有生成口述稿时间轴，可能没有足够的空白时间段。")
-            write_to_srt(narration_data, output_path)
+        # 1. 解析阶段
+        data = _parse_input_file(input_path, conversion_type)
+        
+        # 2. 写入阶段
+        _write_output_file(data, output_path, conversion_type, placeholder_text)
         
         logger.info(f"Conversion successful: {output_path}")
-
+        
     except (ParseError, WriteError) as e:
         # 重新抛出为更通用的转换错误
         logger.error(f"Parse/Write error during conversion: {e}")
@@ -227,49 +265,16 @@ def convert_with_progress(input_path: str, output_path: str, conversion_type: st
     :raises SubtitleConverterError: 转换过程中发生的任何错误。
     """
     logger.info(f"Starting conversion with progress: {input_path} -> {output_path} (type: {conversion_type})")
-    data: List[List[str]] = []
+    
     try:
-        # --- 1. 解析阶段 ---
-        if conversion_type == 'sup_to_srt':
-            if input_path.lower().endswith('.sup'):
-                data = parse_sup_to_srt_structure(input_path, target_language=target_language, progress_callback=progress_callback)
-            else:
-                raise SubtitleConverterError("输入文件必须是 .sup 格式。")
-
-        elif conversion_type == 'sup_to_excel':
-            if input_path.lower().endswith('.sup'):
-                data = parse_sup_to_srt_structure(input_path, target_language=target_language, progress_callback=progress_callback)
-            else:
-                raise SubtitleConverterError("输入文件必须是 .sup 格式。")
-
-        elif conversion_type == 'auto_narration_timing':
-            if input_path.lower().endswith('.sup'):
-                data = parse_sup_to_srt_structure(input_path, target_language=target_language, progress_callback=progress_callback)
-            else:
-                raise SubtitleConverterError("输入文件必须是 .sup 格式。")
+        # 1. 解析阶段(支持进度回调)
+        data = _parse_input_file(input_path, conversion_type, progress_callback, target_language)
         
-        else:
-            raise SubtitleConverterError(f"不支持的转换类型: {conversion_type}")
-
-        # --- 2. 检查解析结果 ---
-        if not data:
-            logger.warning("No data parsed from the input file.")
-            raise SubtitleConverterError(constants.MSG_WARNING_NO_DATA_PARSED)
-
-        # --- 3. 写入阶段 ---
-        if conversion_type == 'sup_to_excel':
-            write_to_excel(data, output_path)
-        elif conversion_type == 'sup_to_srt':
-            write_to_srt(data, output_path)
-        elif conversion_type == 'auto_narration_timing':
-            narration_data = generate_narration_timing(data, placeholder_text)
-            if not narration_data:
-                logger.warning("No narration timing generated from the input file.")
-                raise SubtitleConverterError("没有生成口述稿时间轴，可能没有足够的空白时间段。")
-            write_to_srt(narration_data, output_path)
+        # 2. 写入阶段
+        _write_output_file(data, output_path, conversion_type, placeholder_text)
         
         logger.info(f"Conversion with progress successful: {output_path}")
-
+        
     except (ParseError, WriteError) as e:
         # 重新抛出为更通用的转换错误
         logger.error(f"Parse/Write error during conversion: {e}")

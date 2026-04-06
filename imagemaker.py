@@ -1,5 +1,15 @@
+import logging
 import numpy as np
 from PIL import Image
+
+# 配置日志记录器
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 def read_rle_bytes(ods_bytes):
 
@@ -40,7 +50,7 @@ def read_rle_bytes(ods_bytes):
         i += incr
 
     if line_builder:
-        print(f'Probably an error; hanging pixels: {line_builder}')
+        logger.warning(f'Probably an error; hanging pixels: {line_builder}')
 
     return pixels
                         

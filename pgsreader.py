@@ -1,7 +1,17 @@
 #!/usr/bin/env python3
 
+import logging
 from os.path import split as pathsplit
 from collections import namedtuple
+
+# 配置日志记录器
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
 
 # Constants for Segments
 PDS = int('0x14', 16)
@@ -133,8 +143,7 @@ class PresentationCompositionSegment(BaseSegment):
         if not hasattr(self, '_composition_objects'):
             self._composition_objects = self.get_composition_objects()
             if len(self._composition_objects) != self._num_comps:
-                print('Warning: Number of composition objects asserted '
-                      'does not match the amount found.')
+                logger.warning('Number of composition objects asserted does not match the amount found.')
         return self._composition_objects
 
     def get_composition_objects(self):
@@ -188,8 +197,7 @@ class ObjectDefinitionSegment(BaseSegment):
         self.height = int(self.data[9:11].hex(), base=16)
         self.img_data = self.data[11:]
         if len(self.img_data) != self.data_len - 4:
-            print('Warning: Image data length asserted does not match the '
-                  'length found.')
+            logger.warning('Image data length asserted does not match the length found.')
 
 class EndSegment(BaseSegment):
 
