@@ -60,33 +60,29 @@ if not TEMPLATES_DIR.exists():
     logger.warning(f"Templates directory '{TEMPLATES_DIR}' does not exist. Creating...")
     TEMPLATES_DIR.mkdir(parents=True, exist_ok=True)
 
-# 挂载静态文件目录 (如果存在)
+# 挂载静态文件目录
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=STATIC_DIR, html=True), name="static")
-    # 提供根路径的index.html
-    @app.get("/")
-    async def read_root():
-        """
-        根路径，提供前端主页面 index.html。
-        """
-        index_file_path = STATIC_DIR / "index.html"
-        if not index_file_path.exists():
-            logger.error(f"Frontend index.html file not found at {index_file_path}")
-            raise HTTPException(status_code=404, detail="前端页面文件未找到。")
+
+@app.get("/")
+async def read_root():
+    """
+    根路径，提供前端主页面 index.html。
+    优先从 static 目录获取，如果不存在则从 templates 目录获取。
+    """
+    # 优先尝试 static/index.html
+    index_file_path = STATIC_DIR / "index.html"
+    if index_file_path.exists():
         return FileResponse(index_file_path)
-else:
-    logger.warning(f"Static directory '{STATIC_DIR}' not found. Frontend will not be served.")
-    # 如果没有静态文件目录，仍然提供根路径访问templates中的index.html
-    @app.get("/")
-    async def read_root():
-        """
-        根路径，提供前端主页面 index.html。
-        """
-        index_file_path = TEMPLATES_DIR / "index.html"
-        if not index_file_path.exists():
-            logger.error(f"Frontend index.html file not found at {index_file_path}")
-            raise HTTPException(status_code=404, detail="前端页面文件未找到。")
+    
+    # 回退到 templates/index.html
+    index_file_path = TEMPLATES_DIR / "index.html"
+    if index_file_path.exists():
         return FileResponse(index_file_path)
+    
+    # 都不存在则报错
+    logger.error("Frontend index.html file not found in static or templates directory")
+    raise HTTPException(status_code=404, detail="前端页面文件未找到。")
 
 # --- 静态文件路由 ---
 

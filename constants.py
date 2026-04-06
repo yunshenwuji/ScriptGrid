@@ -3,30 +3,6 @@
 用于存储项目中使用的各种常量，便于统一管理和维护。
 """
 
-# --- GUI 相关 ---
-WINDOW_TITLE = "述格 (ScriptGrid)"
-WINDOW_WIDTH = 400
-WINDOW_HEIGHT = 350
-
-BUTTON_WIDTH = 30
-BUTTON_HEIGHT = 2
-BUTTON_PADY = 10
-
-BUTTON_TEXT_CONVERT_TO_EXCEL = "字幕转表格 (.ass, .srt -> .xlsx)"
-BUTTON_TEXT_ASS_TO_SRT = "ASS 转 SRT (.ass -> .srt)"
-BUTTON_TEXT_XLSX_TO_SRT = "表格转字幕 (.xlsx -> .srt)"
-BUTTON_TEXT_CLOSE = "关闭软件"
-
-# --- 文件对话框相关 ---
-DIALOG_TITLE_SELECT_SUBTITLE = "请选择字幕文件"
-DIALOG_TITLE_SELECT_ASS = "请选择 ASS 字幕文件"
-DIALOG_TITLE_SELECT_XLSX = "请选择字幕表格文件"
-
-FILETYPE_SUBTITLE = ("字幕文件", "*.ass *.srt")
-FILETYPE_ASS = ("ASS 字幕文件", "*.ass")
-FILETYPE_XLSX = ("Excel 文件", "*.xlsx")
-FILETYPE_ALL = ("所有文件", "*.*")
-
 # --- Excel 表头 ---
 EXCEL_HEADERS = ["序号", "开始时间", "结束时间", "字幕内容"]
 EXCEL_SHEET_NAME = "Sheet1"
@@ -50,12 +26,6 @@ MSG_ERROR_PARSING_XLSX = "解析 Excel 文件时出错: {error}"
 MSG_ERROR_WRITING_SRT = "写入 SRT 文件时出错: {error}"
 
 # --- SUP PGS 转换相关 ---
-BUTTON_TEXT_SUP_TO_SRT = "SUP 转 SRT (.sup -> .srt)"
-BUTTON_TEXT_SUP_TO_EXCEL = "SUP 转表格 (.sup -> .xlsx)"
-
-DIALOG_TITLE_SELECT_SUP = "请选择 SUP 字幕文件"
-FILETYPE_SUP = ("SUP 字幕文件", "*.sup")
-
 MSG_WARNING_NO_DATA_PARSED_DETAIL_SUP = "未能从 SUP 文件中提取任何有效的字幕数据。"
 MSG_ERROR_PROCESSING_DETAIL_SUP = "处理 SUP 文件时发生错误: \n{error}"
 MSG_ERROR_PARSING_SUP = "解析 SUP 文件时出错: {error}"

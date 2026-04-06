@@ -16,9 +16,11 @@ try:
     from pgsreader import PGSReader
     from imagemaker import make_image
     import constants
+    HAS_SUP_SUPPORT = True
 except ImportError as e:
-    print(f"警告: SUP 支持需要额外依赖，请安装: pip install torchfree_ocr onnxruntime")
-    print(f"导入错误: {e}")
+    HAS_SUP_SUPPORT = False
+    import logging
+    logging.getLogger(__name__).warning(f"SUP 支持需要额外依赖: {e}")
 
 def parse_srt(file_path):
     """
@@ -90,9 +92,8 @@ class SupOcrEngine:
                 
                 # 创建新的符号链接
                 os.symlink(model_dir, torchfree_ocr_dir, target_is_directory=True)
-                print(f"创建符号链接: {torchfree_ocr_dir} -> {model_dir}")
             except (OSError, NotImplementedError, PermissionError) as e:
-                print(f"无法创建符号链接: {e}，将使用环境变量")
+                pass  # 忽略符号链接创建失败
         
         # 尝试在初始化之前动态修改TorchfreeEasyOCR的模型路径
         try:
@@ -104,12 +105,6 @@ class SupOcrEngine:
                 tfocr_module.model_storage_directory = model_dir
         except ImportError:
             pass  # 如果无法导入内部模块，就跳过
-        
-        
-        print(f"设置OCR模型路径: {model_dir}")
-        print(f"模型目录存在: {os.path.exists(model_dir)}")
-        if os.path.exists(model_dir):
-            print(f"模型目录内容: {os.listdir(model_dir)}")
         
         try:
             # 初始化 TorchfreeEasyOCR 读取器
@@ -134,6 +129,9 @@ class SupOcrEngine:
         :param language_codes: 语言代码列表
         :return: 验证后的语言代码列表
         """
+        import logging
+        logger = logging.getLogger(__name__)
+        
         valid_languages = set(constants.SUPPORTED_LANGUAGES.keys()) - {'auto'}  # 移除自动检测
         validated_codes = []
         
@@ -141,11 +139,11 @@ class SupOcrEngine:
             if code in valid_languages:
                 validated_codes.append(code)
             else:
-                print(f"警告: 不支持的语言代码 '{code}'，将被忽略")
+                logger.warning(f"不支持的语言代码 '{code}'，将被忽略")
         
         # 如果没有有效的语言代码，使用默认语言
         if not validated_codes:
-            print("警告: 没有有效的语言代码，使用默认中英文")
+            logger.warning("没有有效的语言代码，使用默认中英文")
             validated_codes = constants.DEFAULT_OCR_LANGUAGES
         
         return validated_codes
@@ -171,11 +169,13 @@ class SupOcrEngine:
             
         except Exception as e:
             # OCR 失败时返回空字符串，而非抛出异常
+            import logging
+            logger = logging.getLogger(__name__)
             error_msg = str(e).lower()
             if 'onnx' in error_msg or 'onnxruntime' in error_msg:
-                print(f"警告: ONNX Runtime OCR 识别失败: {e}")
+                logger.warning(f"ONNX Runtime OCR 识别失败: {e}")
             else:
-                print(f"警告: OCR 识别失败: {e}")
+                logger.warning(f"OCR 识别失败: {e}")
             return ""
     
     def _preprocess_subtitle_image(self, image):
@@ -202,7 +202,9 @@ class SupOcrEngine:
             return image
             
         except Exception as e:
-            print(f"警告: 图像预处理失败: {e}")
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"图像预处理失败: {e}")
             return image  # 返回原图像
     
     def _postprocess_ocr_results(self, results):
@@ -237,6 +239,9 @@ def _detect_subtitle_language(sample_images, max_samples=20):
     :param max_samples: 最大样本数量（默认20帧）
     :return: 检测到的语言代码列表
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     try:
         # 设置多个可能的模型路径环境变量，确保TorchfreeEasyOCR从/models目录读取模型
         model_dir = os.path.join(os.getcwd(), constants.OCR_MODEL_DIRECTORY)
@@ -287,7 +292,7 @@ def _detect_subtitle_language(sample_images, max_samples=20):
                 continue
             
             total_processed += 1
-            print(f"语言检测样本 {i+1}: {text[:30]}...")
+            logger.info(f"语言检测样本 {i+1}: {text[:30]}...")
             
             # 简单的字符集检测
             chinese_chars = len(re.findall(r'[\u4e00-\u9fff]', text))
@@ -298,7 +303,7 @@ def _detect_subtitle_language(sample_images, max_samples=20):
             if english_chars > 0:
                 english_count += 1
         
-        print(f"语言检测结果: 中文={chinese_count}, 英文={english_count}, 总处理样本={total_processed}")
+        logger.info(f"语言检测结果: 中文={chinese_count}, 英文={english_count}, 总处理样本={total_processed}")
         
         # 根据检测结果决定语言
         if chinese_count > 0 and english_count > 0:
@@ -311,7 +316,7 @@ def _detect_subtitle_language(sample_images, max_samples=20):
             return constants.DEFAULT_OCR_LANGUAGES  # 默认中英文
             
     except Exception as e:
-        print(f"警告: 语言检测失败: {e}，使用默认语言")
+        logger.warning(f"语言检测失败: {e}，使用默认语言")
         return constants.DEFAULT_OCR_LANGUAGES
 
 
@@ -354,8 +359,11 @@ def parse_sup_to_srt_structure(file_path, target_language=None, progress_callbac
     :return: List[List[str]]: [序号, 开始时间, 结束时间, 字幕内容]
     :raises SupParseError: 当解析过程出错时
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     try:
-        print(f"开始解析 SUP 文件: {file_path}")
+        logger.info(f"开始解析 SUP 文件: {file_path}")
         
         # 1. 初始化 PGS 读取器
         pgs_reader = PGSReader(file_path)
@@ -364,7 +372,7 @@ def parse_sup_to_srt_structure(file_path, target_language=None, progress_callbac
         if not displaysets:
             raise SupParseError("无法从 SUP 文件中提取字幕数据")
         
-        print(f"找到 {len(displaysets)} 个字幕帧")
+        logger.info(f"找到 {len(displaysets)} 个字幕帧")
         
         # 进度回调：开始解析
         if progress_callback:
@@ -391,7 +399,7 @@ def parse_sup_to_srt_structure(file_path, target_language=None, progress_callbac
         
         if target_language is None:
             detected_languages = _detect_subtitle_language(sample_images)
-            print(f"检测到的语言: {detected_languages}")
+            logger.info(f"检测到的语言: {detected_languages}")
         else:
             detected_languages = [target_language] if isinstance(target_language, str) else target_language
         
@@ -421,7 +429,7 @@ def parse_sup_to_srt_structure(file_path, target_language=None, progress_callbac
                 ods = next((s for s in ds.segments if s.type == 'ODS'), None)
                 
                 if not (pcs and pds and ods):
-                    print(f"警告: 帧 {i} 缺少必要的段，跳过")
+                    logger.warning(f"帧 {i} 缺少必要的段，跳过")
                     continue
                 
                 # 提取时间戳（使用 PCS 的时间戳）
@@ -435,14 +443,9 @@ def parse_sup_to_srt_structure(file_path, target_language=None, progress_callbac
                         temp_text = ocr_engine.recognize_subtitle_text(image)
                         if temp_text.strip():
                             first_valid_pts = start_pts
-                            print(f"第一个有效字幕的时间戳: {first_valid_pts} 秒")
+                            logger.info(f"第一个有效字幕的时间戳: {first_valid_pts} 秒")
                     except:
                         pass
-                
-                # 调试信息：显示原始时间戳值
-                if i < 5:  # 显示前5帧的调试信息
-                    converted_time = _convert_pgs_timestamp_to_srt(start_pts)
-                    print(f"调试: 帧 {i} - 原始 PTS: {start_pts}, 转换后: {converted_time}")
                 
                 # 查找下一个 DisplaySet 的时间戳作为结束时间
                 if i + 1 < len(displaysets):
@@ -465,7 +468,7 @@ def parse_sup_to_srt_structure(file_path, target_language=None, progress_callbac
                 if text.strip():
                     subtitle_count += 1  # 增加字幕计数
                     data.append([str(subtitle_count), start_time, end_time, text.strip()])
-                    print(f"提取字幕 {subtitle_count}: {text.strip()[:50]}...")
+                    logger.info(f"提取字幕 {subtitle_count}: {text.strip()[:50]}...")
                     
                     # 立即更新进度回调，包含最新的字幕数量
                     if progress_callback:
@@ -475,10 +478,10 @@ def parse_sup_to_srt_structure(file_path, target_language=None, progress_callbac
                                         phase="ocr_processing", percentage=percentage, subtitle_count=subtitle_count)
                 
             except Exception as e:
-                print(f"警告: 处理帧 {i} 时出错: {e}，跳过")
+                logger.warning(f"处理帧 {i} 时出错: {e}，跳过")
                 continue
         
-        print(f"SUP 解析完成，共提取到 {subtitle_count} 条字幕")
+        logger.info(f"SUP 解析完成，共提取到 {subtitle_count} 条字幕")
         
         # 进度回调：完成
         if progress_callback:
@@ -529,6 +532,9 @@ def parse_ass_to_srt_structure(file_path):
     :return: 一个二维列表，格式与 parse_srt 的返回结果完全相同。
     :raises ParseError: 当解析过程出错时（例如缺少关键字段）。
     """
+    import logging
+    logger = logging.getLogger(__name__)
+    
     data = []
     try:
         with open(file_path, 'r', encoding='utf-8-sig') as f:
@@ -566,7 +572,7 @@ def parse_ass_to_srt_structure(file_path):
                 parts = line.split(':', 1)[1].strip().split(',', len(format_map) - 1)
             except Exception as e:
                 # 如果分割出错，跳过这一行并记录警告
-                print(f"警告: 解析 Dialogue 行时出错，已跳过: {line}. 错误: {e}")
+                logger.warning(f"解析 Dialogue 行时出错，已跳过: {line}. 错误: {e}")
                 continue
 
             # 根据之前创建的映射，从 parts 列表中安全地提取数据
@@ -589,11 +595,11 @@ def parse_ass_to_srt_structure(file_path):
                 dialogue_count += 1 # 序号加一
             except (IndexError, KeyError) as e:
                 # 如果字段访问出错，跳过这一行并记录警告
-                print(f"警告: Dialogue 行字段不完整或格式错误，已跳过: {line}. 错误: {e}")
+                logger.warning(f"Dialogue 行字段不完整或格式错误，已跳过: {line}. 错误: {e}")
                 continue
             except Exception as e:
                 # 其他与处理相关的错误
-                print(f"警告: 处理 Dialogue 行时出错，已跳过: {line}. 错误: {e}")
+                logger.warning(f"处理 Dialogue 行时出错，已跳过: {line}. 错误: {e}")
                 continue
 
     return data
