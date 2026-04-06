@@ -179,13 +179,34 @@ function bindEventListeners() {
                     const link = document.createElement('a');
                     link.href = downloadUrl;
                     
-                    // 根据转换类型设置默认文件名后缀
-                    let fileExt = '.xlsx';
-                    if (conversionType === 'ass_to_srt' || conversionType === 'xlsx_to_srt' || 
-                        conversionType === 'sup_to_srt' || conversionType === 'auto_narration_timing') {
-                        fileExt = '.srt';
+                    // 从响应头获取文件名
+                    let filename = null;
+                    const contentDisposition = response.headers.get('content-disposition');
+                    if (contentDisposition) {
+                        // 尝试匹配 filename*=utf-8''编码的文件名（不区分大小写）
+                        const matches = contentDisposition.match(/filename\*=utf-8''(.+?)(?:;|$)/i);
+                        if (matches) {
+                            filename = decodeURIComponent(matches[1]);
+                        } else {
+                            // 尝试匹配 filename="文件名"
+                            const matches2 = contentDisposition.match(/filename="([^"]+)"/);
+                            if (matches2) {
+                                filename = matches2[1];
+                            }
+                        }
                     }
-                    link.download = file.name.substring(0, file.name.lastIndexOf('.')) + fileExt;
+                    
+                    // 如果无法从响应头获取文件名，则使用原始文件名
+                    if (!filename) {
+                        let fileExt = '.xlsx';
+                        if (conversionType === 'ass_to_srt' || conversionType === 'xlsx_to_srt' || 
+                            conversionType === 'sup_to_srt' || conversionType === 'auto_narration_timing') {
+                            fileExt = '.srt';
+                        }
+                        filename = file.name.substring(0, file.name.lastIndexOf('.')) + fileExt;
+                    }
+                    
+                    link.download = filename;
                     document.body.appendChild(link);
                     link.click();
                     document.body.removeChild(link);
