@@ -20,7 +20,7 @@ if not logger.handlers:
 
 
 # Import local modules
-from parsers import parse_srt, parse_ass_to_srt_structure, parse_sup_to_srt_structure, parse_xlsx
+from parsers import parse_srt, parse_ass_to_srt_structure, parse_sup_to_srt_structure, parse_sup_timeline_only, parse_xlsx
 from writers import write_to_excel, write_to_srt
 from exceptions import SubtitleConverterError, ParseError, WriteError
 import constants
@@ -166,9 +166,9 @@ def _parse_input_file(input_path: str, conversion_type: str, progress_callback=N
         elif input_path.lower().endswith('.ass'):
             data = parse_ass_to_srt_structure(input_path)
         elif input_path.lower().endswith('.sup'):
-            data = parse_sup_to_srt_structure(
+            # SUP 文件使用优化的时间轴解析（不进行 OCR，大幅提升速度）
+            data = parse_sup_timeline_only(
                 input_path, 
-                target_language=target_language, 
                 progress_callback=progress_callback
             )
         else:

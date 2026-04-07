@@ -51,6 +51,90 @@ def _convert_pgs_timestamp_to_srt(pts_time):
         return "00:00:00,000"
 
 
+def parse_sup_timeline_only(file_path, progress_callback=None):
+    """
+    仅解析 SUP 文件的时间轴信息，不进行 OCR 识别
+    专用于空白口述稿自动打轴功能，大幅提高处理速度
+    
+    :param file_path: SUP 文件路径
+    :param progress_callback: 进度回调函数 callback(current, total, message)
+    :return: List[List[str]]: [序号, 开始时间, 结束时间, ""] (空文本)
+    :raises SupParseError: 当解析过程出错时
+    """
+    try:
+        logger.info(f"开始解析 SUP 时间轴（无OCR）: {file_path}")
+        
+        # 1. 初始化 PGS 读取器
+        pgs_reader = PGSReader(file_path)
+        displaysets = pgs_reader.displaysets
+        
+        if not displaysets:
+            raise SupParseError("无法从 SUP 文件中提取字幕数据")
+        
+        logger.info(f"找到 {len(displaysets)} 个字幕帧")
+        
+        # 进度回调:开始解析
+        if progress_callback:
+            progress_callback(0, len(displaysets), "开始解析 SUP 时间轴...", phase="file_parsing")
+        
+        # 2. 遍历所有 DisplaySet,仅提取时间轴信息
+        data = []
+        subtitle_count = 0
+        
+        for i, ds in enumerate(displaysets):
+            # 进度回调:处理帧进度
+            if progress_callback:
+                percentage = int((i / len(displaysets)) * 100)
+                progress_callback(i + 1, len(displaysets), f"正在处理第 {i+1}/{len(displaysets)} 帧...", 
+                                current_frame=i + 1, total_frames=len(displaysets), 
+                                phase="timeline_parsing", percentage=percentage, subtitle_count=subtitle_count)
+            
+            try:
+                # 提取必要的段（PCS、PDS、ODS）
+                pcs = next((s for s in ds.segments if s.type == 'PCS'), None)
+                pds = next((s for s in ds.segments if s.type == 'PDS'), None)
+                ods = next((s for s in ds.segments if s.type == 'ODS'), None)
+                
+                if not (pcs and pds and ods):
+                    logger.debug(f"帧 {i} 缺少必要的段,跳过")
+                    continue
+                
+                # 提取时间戳
+                start_pts = pcs.pts
+                
+                # 查找下一个 DisplaySet 的时间戳作为结束时间
+                if i + 1 < len(displaysets):
+                    next_pcs = next((s for s in displaysets[i + 1].segments if s.type == 'PCS'), None)
+                    end_pts = next_pcs.pts if next_pcs else start_pts + 2000  # 默认2秒(毫秒单位)
+                else:
+                    end_pts = start_pts + 2000  # 最后一帧,默认显示2秒
+                
+                # 复用现有的时间戳转换函数
+                start_time = _convert_pgs_timestamp_to_srt(start_pts)
+                end_time = _convert_pgs_timestamp_to_srt(end_pts)
+                
+                # 添加字幕条目（空文本）
+                subtitle_count += 1
+                data.append([str(subtitle_count), start_time, end_time, ""])
+                
+            except Exception as e:
+                logger.warning(f"处理帧 {i} 时出错: {e},跳过")
+                continue
+        
+        logger.info(f"SUP 时间轴解析完成,共提取到 {subtitle_count} 条字幕时间轴")
+        
+        # 进度回调:完成
+        if progress_callback:
+            progress_callback(len(displaysets), len(displaysets), f"解析完成!共提取到 {subtitle_count} 条时间轴", 
+                            current_frame=len(displaysets), total_frames=len(displaysets), 
+                            phase="complete", percentage=100, subtitle_count=subtitle_count)
+        
+        return data
+        
+    except Exception as e:
+        raise SupParseError(f"解析 SUP 时间轴 '{file_path}' 时出错: {e}") from e
+
+
 def parse_sup_to_srt_structure(file_path, target_language=None, progress_callback=None):
     """
     解析 SUP 文件并转换为标准 SRT 数据结构

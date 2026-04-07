@@ -69,6 +69,7 @@ const languages = {
             language_detection: '正在检测字幕语言...',
             ocr_init: '正在初始化OCR引擎...',
             ocr_processing: '正在识别字幕内容...',
+            timeline_parsing: '正在解析字幕时间轴...',
             complete: '转换完成！'
         },
         
@@ -144,6 +145,7 @@ const languages = {
             language_detection: 'Detecting subtitle language...',
             ocr_init: 'Initializing OCR engine...',
             ocr_processing: 'Recognizing subtitle content...',
+            timeline_parsing: 'Parsing subtitle timeline...',
             complete: 'Conversion complete!'
         },
         
