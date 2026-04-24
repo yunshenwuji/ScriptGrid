@@ -1,6 +1,7 @@
 # Git相关文件
 .git
 .gitignore
+.github
 
 # Python缓存文件
 __pycache__
@@ -32,4 +33,8 @@ Thumbs.db
 # IDE配置文件
 .qoder/
 
+# python 虚拟环境
 ScriptGrid/
+
+# 自动化测试脚本目录
+test/
