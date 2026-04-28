@@ -48,11 +48,17 @@ function Write-Step($msg) {
 }
 
 function Check-Backend {
+    # 禁用进度条，避免其绘制/清除动作与上一条 -NoNewline 输出的中文宽字符
+    # 发生重绘冲突，导致 "检查后端服务 ..." 行出现字符重复或错位的回显异常
+    $prevProgress = $ProgressPreference
+    $ProgressPreference = 'SilentlyContinue'
     try {
         $null = Invoke-WebRequest -Uri $BaseUrl -Method GET -TimeoutSec 5 -UseBasicParsing
         return $true
     } catch {
         return $false
+    } finally {
+        $ProgressPreference = $prevProgress
     }
 }
 
