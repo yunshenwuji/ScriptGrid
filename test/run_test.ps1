@@ -9,8 +9,10 @@ $ErrorActionPreference = 'Continue'
 
 # ===== 配置区 =====
 $BaseUrl = 'http://127.0.0.1:8000'
-$TestDir = 'c:\ScriptGrid\test'
-$ProjectDir = 'c:\ScriptGrid'
+# 自动根据脚本所在位置推导路径，避免在不同 Windows 开发机上因绝对路径写死而失效
+# 约定脚本位于 <项目根>\test\run_test.ps1
+$TestDir = $PSScriptRoot
+$ProjectDir = Split-Path -Parent $PSScriptRoot
 $PythonExe = Join-Path $ProjectDir 'ScriptGrid\Scripts\python.exe'
 $PwDir = Join-Path $TestDir '.playwright-cli'
 $TemplateDir = Join-Path $TestDir 'templates'
