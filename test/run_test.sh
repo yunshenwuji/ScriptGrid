@@ -406,6 +406,21 @@ fi
 # 5. 清理旧的实际输出文件
 cleanup_actual_files
 
+# 5.1 启动浏览器前：若 .playwright-cli 目录不为空则整体清空
+#     避免历史下载文件或残留日志影响本轮异步用例的下载文件识别
+printf '检查 .playwright-cli 目录... '
+if [[ -d "$PW_DIR" ]]; then
+    item_count=$(find "$PW_DIR" -mindepth 1 -maxdepth 1 2>/dev/null | wc -l)
+    if [[ $item_count -gt 0 ]]; then
+        find "$PW_DIR" -mindepth 1 -delete 2>/dev/null
+        printf '%s已清空 (%d 项)%s\n' "$C_GREEN" "$item_count" "$C_RESET"
+    else
+        printf '%s已为空%s\n' "$C_GREEN" "$C_RESET"
+    fi
+else
+    printf '%s不存在，跳过%s\n' "$C_YELLOW" "$C_RESET"
+fi
+
 # 6. 启动浏览器（Linux 默认使用 chromium）
 printf '启动 Chromium 浏览器 (无头模式)... '
 open_output="$(playwright-cli open --browser=chromium "$BASE_URL" 2>&1)"

@@ -416,6 +416,22 @@ if ((Test-Path $synTemplate) -and (Test-Path $asynTemplate)) {
 # 5. 清理旧的实际输出文件
 Cleanup-ActualFiles
 
+# 5.1 启动浏览器前：若 .playwright-cli 目录不为空则整体清空
+#     避免历史下载文件或残留日志影响本轮异步用例的下载文件识别
+Write-Host -NoNewline '检查 .playwright-cli 目录... '
+if (Test-Path $PwDir) {
+    $existingItems = @(Get-ChildItem $PwDir -Force -ErrorAction SilentlyContinue)
+    if ($existingItems.Count -gt 0) {
+        Get-ChildItem $PwDir -Force -Recurse -ErrorAction SilentlyContinue |
+            Remove-Item -Force -Recurse -ErrorAction SilentlyContinue
+        Write-Host ('已清空 (' + $existingItems.Count + ' 项)') -ForegroundColor Green
+    } else {
+        Write-Host '已为空' -ForegroundColor Green
+    }
+} else {
+    Write-Host '不存在，跳过' -ForegroundColor Yellow
+}
+
 # 6. 启动浏览器
 Write-Host -NoNewline '启动 Edge 浏览器 (无头模式)... '
 $openResult = & playwright-cli open --browser=msedge $BaseUrl 2>&1
