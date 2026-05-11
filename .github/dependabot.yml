@@ -9,9 +9,6 @@ updates:
       time: "09:00"
       timezone: "Asia/Shanghai"
     open-pull-requests-limit: 5
-    labels:
-      - "dependencies"
-      - "automated"
     commit-message:
       prefix: "deps"
       include: "scope"
@@ -28,9 +25,6 @@ updates:
       time: "09:00"
       timezone: "Asia/Shanghai"
     open-pull-requests-limit: 3
-    labels:
-      - "ci-cd"
-      - "automated"
     commit-message:
       prefix: "ci"
       include: "scope"
