@@ -3,7 +3,7 @@
 fastapi==0.136.1
 uvicorn[standard]==0.46.0
 openpyxl==3.1.5
-python-multipart==0.0.28
+python-multipart==0.0.29
 
 # SUP PGS 字幕转换相关依赖（使用 TorchfreeOCR 替代 PyTorch）
 torchfree_ocr==1.1.0
