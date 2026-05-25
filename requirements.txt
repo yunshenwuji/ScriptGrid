@@ -1,6 +1,6 @@
 # 述格 (ScriptGrid) Web 应用 - 后端依赖
 
-fastapi==0.136.1
+fastapi==0.136.3
 uvicorn[standard]==0.47.0
 openpyxl==3.1.5
 python-multipart==0.0.29
