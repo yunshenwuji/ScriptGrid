@@ -179,31 +179,21 @@ function bindEventListeners() {
                     const link = document.createElement('a');
                     link.href = downloadUrl;
                     
-                    // 从响应头获取文件名
+                    // 从 Content-Disposition 响应头获取文件名（后端统一负责命名）
                     let filename = null;
-                    const contentDisposition = response.headers.get('content-disposition');
-                    if (contentDisposition) {
-                        // 尝试匹配 filename*=utf-8''编码的文件名（不区分大小写）
-                        const matches = contentDisposition.match(/filename\*=utf-8''(.+?)(?:;|$)/i);
-                        if (matches) {
-                            filename = decodeURIComponent(matches[1]);
+                    const cd = response.headers.get('content-disposition');
+                    if (cd) {
+                        // 优先匹配 filename*=utf-8'' 编码格式
+                        const utf8Match = cd.match(/filename\*=(?:utf-8|UTF-8)''([^;]+)/);
+                        if (utf8Match) {
+                            filename = decodeURIComponent(utf8Match[1].trim());
                         } else {
-                            // 尝试匹配 filename="文件名"
-                            const matches2 = contentDisposition.match(/filename="([^"]+)"/);
-                            if (matches2) {
-                                filename = matches2[1];
+                            // 回退匹配 filename="xxx" 引号格式
+                            const quotedMatch = cd.match(/filename="([^;]+)"/);
+                            if (quotedMatch) {
+                                filename = quotedMatch[1].trim();
                             }
                         }
-                    }
-                    
-                    // 如果无法从响应头获取文件名，则使用原始文件名
-                    if (!filename) {
-                        let fileExt = '.xlsx';
-                        if (conversionType === 'ass_to_srt' || conversionType === 'xlsx_to_srt' || 
-                            conversionType === 'sup_to_srt' || conversionType === 'auto_narration_timing') {
-                            fileExt = '.srt';
-                        }
-                        filename = file.name.substring(0, file.name.lastIndexOf('.')) + fileExt;
                     }
                     
                     link.download = filename;

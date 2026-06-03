@@ -117,15 +117,8 @@ function startProgressMonitoring(taskId) {
                             const link = document.createElement('a');
                             link.href = downloadUrl;
                             
-                            // 从响应头获取文件名
-                            const contentDisposition = downloadResponse.headers.get('content-disposition');
-                            let filename = 'converted_file';
-                            if (contentDisposition) {
-                                const matches = contentDisposition.match(/filename="(.+)"/);
-                                if (matches) {
-                                    filename = matches[1];
-                                }
-                            }
+                            // 从后端进度事件中获取输出文件名（后端统一负责命名）
+                            const filename = data.output_filename || 'output';
                             
                             link.download = filename;
                             document.body.appendChild(link);

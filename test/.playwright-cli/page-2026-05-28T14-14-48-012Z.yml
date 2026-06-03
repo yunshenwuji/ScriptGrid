@@ -1,0 +1,30 @@
+- generic [active] [ref=e1]:
+  - button "English" [ref=e3] [cursor=pointer]
+  - generic [ref=e6]:
+    - heading "述格 (ScriptGrid)" [level=1] [ref=e7]
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e10]: 选择字幕文件
+        - button "选择字幕文件" [ref=e11] [cursor=pointer]
+        - generic [ref=e12]: 支持 .ass, .srt, .xlsx, .sup 格式。
+      - generic [ref=e13]:
+        - generic [ref=e14]: 转换类型
+        - combobox "选择转换类型" [disabled] [ref=e15]:
+          - option "请先选择文件" [selected]
+      - generic [ref=e16]:
+        - button "开始处理" [disabled]
+  - contentinfo [ref=e17]:
+    - generic [ref=e20]:
+      - paragraph [ref=e21]:
+        - strong [ref=e22]: 述格 (ScriptGrid)
+        - text: 是一个专为口述影像创作者设计的便捷工具，支持口述稿在 Excel 格式和字幕格式之间的灵活转换。
+      - paragraph [ref=e23]:
+        - text: 如果您在使用过程中遇到任何问题或有改进建议，欢迎在
+        - link "GitHub 项目" [ref=e24] [cursor=pointer]:
+          - /url: https://github.com/yunshenwuji/scriptgrid
+        - text: 中提交 Issue，我们将积极响应并努力解决。
+      - generic [ref=e25]:
+        - paragraph [ref=e26]:
+          - strong [ref=e27]: 如果喜欢述格，欢迎捐赠
+        - paragraph [ref=e28]: 支付宝或微信扫码请我喝杯咖啡
+        - img "支付宝微信收款二维码" [ref=e29]

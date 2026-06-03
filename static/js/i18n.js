@@ -48,6 +48,9 @@ const languages = {
         feedbackSuffix: '中提交 Issue，我们将积极响应并努力解决。',
         donationTitle: '如果喜欢述格，欢迎捐赠',
         donationText: '支付宝或微信扫码请我喝杯咖啡',
+        teamWebsiteIntro: '想了解更多无障碍电影相关信息？',
+        teamWebsiteFollow: '欢迎关注',
+        teamWebsiteLink: '共感无障碍团队官网',
         
         // 语言切换
         langSwitchToEn: 'English',
@@ -124,6 +127,9 @@ const languages = {
         feedbackSuffix: ', and we will respond actively and work to resolve them.',
         donationTitle: 'If you like ScriptGrid, donations are welcome',
         donationText: 'Scan with Alipay or WeChat to buy me a coffee',
+        teamWebsiteIntro: 'Want to learn more about accessible cinema?',
+        teamWebsiteFollow: 'Visit the',
+        teamWebsiteLink: 'Gonggan Accessibility Team Official Website',
         
         // 语言切换
         langSwitchToCn: '中文',
