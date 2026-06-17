@@ -1,6 +1,22 @@
 {
-    "current_version": "1.5.0",
+    "current_version": "1.5.1",
     "releases": [
+        {
+            "version": "1.5.1",
+            "date": "2026-06-17",
+            "changes": {
+                "zh-CN": {
+                    "fixed": [
+                        "修复底部版本号展示异常的问题"
+                    ]
+                },
+                "en": {
+                    "fixed": [
+                        "Fixed issue with abnormal version number display at the bottom"
+                    ]
+                }
+            }
+        },
         {
             "version": "1.5.0",
             "date": "2026-06-17",
