@@ -121,11 +121,31 @@
                         <p class="mb-0"><span data-i18n="teamWebsiteFollow">欢迎关注</span> <a href="https://gonggan.org.cn/" target="_blank" rel="noopener noreferrer"><strong data-i18n="teamWebsiteLink">共感无障碍团队官网</strong></a></p>
                     </div>
 
-                    <p class="text-muted small mt-4 mb-0">Copyright &copy; 2025-2026 共感无障碍团队 All Rights Reserved.</p>
+                    <p class="text-muted small mt-4 mb-0">
+                        Copyright &copy; 2025-2026 共感无障碍团队 All Rights Reserved.
+                        <a href="javascript:void(0)" id="versionBadge" class="version-badge" role="button" data-version="1.0.0" data-i18n-title="changelogViewBtn" data-i18n-aria="changelogViewBtn" aria-label="查看更新日志">v1.0.0</a>
+                    </p>
                 </div>
             </div>
         </div>
     </footer>
+
+    <!-- 更新日志模态框 -->
+    <div class="modal fade" id="changelogModal" tabindex="-1" aria-labelledby="changelogModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="changelogModalTitle" data-i18n="changelogTitle">更新日志</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-i18n-aria="changelogClose"></button>
+                </div>
+                <div class="modal-body" id="changelogModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="changelogClose">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Bootstrap 5 JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
@@ -136,6 +156,7 @@
     <script src="/static/js/task-manager.js"></script>
     <script src="/static/js/page-close.js"></script>
     <script src="/static/js/progress.js"></script>
+    <script src="/static/js/changelog.js"></script>
     <script src="/static/js/app.js"></script>
 </body>
 </html>

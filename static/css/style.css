@@ -39,3 +39,146 @@ a:focus, button:focus, input:focus, select:focus {
         padding: 0.25rem 0.5rem;
     }
 }
+
+/* ==================== 版本徽章 ==================== */
+
+.version-badge {
+    display: inline-block;
+    padding: 0.1rem 0.5rem;
+    margin-left: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6c757d;
+    background-color: #e9ecef;
+    border-radius: 1rem;
+    text-decoration: none;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    position: relative;
+}
+
+.version-badge:hover,
+.version-badge:focus {
+    color: #0d6efd;
+    background-color: #dee2e6;
+    text-decoration: none;
+}
+
+/* NEW 更新提醒红点 */
+.version-badge.has-update::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background-color: #dc3545;
+    border-radius: 50%;
+    border: 1.5px solid #fff;
+    animation: scriptgrid-pulse-red 1.5s infinite;
+}
+
+@keyframes scriptgrid-pulse-red {
+    0% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.5);
+    }
+    70% {
+        box-shadow: 0 0 0 6px rgba(220, 53, 69, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(220, 53, 69, 0);
+    }
+}
+
+/* 尊重用户减少动画偏好 */
+@media (prefers-reduced-motion: reduce) {
+    .version-badge.has-update::after {
+        animation: none;
+    }
+}
+
+/* ==================== 更新日志模态框 ==================== */
+
+.changelog-release {
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.changelog-release:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.changelog-release-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.changelog-version {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0d6efd;
+}
+
+.changelog-date {
+    font-size: 0.8rem;
+    color: #adb5bd;
+}
+
+.changelog-latest-badge {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+}
+
+.changelog-release-body {
+    padding-left: 0.25rem;
+}
+
+.changelog-section {
+    margin-bottom: 0.75rem;
+}
+
+.changelog-section:last-child {
+    margin-bottom: 0;
+}
+
+.changelog-section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: #495057;
+}
+
+.changelog-section-title svg {
+    flex-shrink: 0;
+}
+
+.changelog-item-list {
+    list-style: none;
+    padding-left: 1.5rem;
+    margin: 0;
+}
+
+.changelog-item-list li {
+    position: relative;
+    font-size: 0.85rem;
+    color: #6c757d;
+    line-height: 1.6;
+    padding: 0.1rem 0;
+}
+
+.changelog-item-list li::before {
+    content: '·';
+    position: absolute;
+    left: -0.75rem;
+    color: #adb5bd;
+    font-weight: bold;
+}

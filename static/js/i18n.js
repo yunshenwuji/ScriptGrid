@@ -81,9 +81,21 @@ const languages = {
         subtitleCountLabel: '已识别字幕',
         
         // 页面关闭确认消息
-        pageCloseConfirm: '正在进行文件转换，离开页面将中断任务。确定要离开吗？'
+        pageCloseConfirm: '正在进行文件转换，离开页面将中断任务。确定要离开吗？',
+
+        // 更新日志
+        changelogTitle: '更新日志',
+        changelogClose: '关闭',
+        changelogNew: '新增',
+        changelogImproved: '优化',
+        changelogFixed: '修复',
+        changelogLatest: '最新',
+        changelogLoading: '加载中...',
+        changelogError: '加载更新日志失败，请稍后重试',
+        changelogEmpty: '暂无更新日志',
+        changelogViewBtn: '查看更新日志'
     },
-    
+
     'en': {
         // 页面标题和主要内容
         pageTitle: 'ScriptGrid',
@@ -160,7 +172,19 @@ const languages = {
         subtitleCountLabel: 'Recognized Subtitles',
         
         // 页面关闭确认消息
-        pageCloseConfirm: 'File conversion is in progress. Leaving the page will interrupt the task. Are you sure you want to leave?'
+        pageCloseConfirm: 'File conversion is in progress. Leaving the page will interrupt the task. Are you sure you want to leave?',
+
+        // 更新日志
+        changelogTitle: 'Changelog',
+        changelogClose: 'Close',
+        changelogNew: 'New',
+        changelogImproved: 'Improved',
+        changelogFixed: 'Fixed',
+        changelogLatest: 'Latest',
+        changelogLoading: 'Loading...',
+        changelogError: 'Failed to load changelog, please try again later',
+        changelogEmpty: 'No changelog entries',
+        changelogViewBtn: 'View Changelog'
     }
 };
 
@@ -228,6 +252,11 @@ class LanguageManager {
         // 更新语言选择框选项
         if (typeof updateLanguageOptions === 'function') {
             updateLanguageOptions();
+        }
+        
+        // 通知更新日志查看器语言已切换
+        if (typeof changelogViewer !== 'undefined' && changelogViewer) {
+            changelogViewer.onLanguageChange();
         }
     }
     

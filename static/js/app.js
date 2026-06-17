@@ -7,6 +7,7 @@
 let languageManager;
 let taskStateManager;
 let pageCloseHandler;
+let changelogViewer;
 let supportedLanguages = {};
 
 // DOM元素
@@ -37,6 +38,17 @@ function initializeApp() {
     // 初始化页面关闭确认处理器
     pageCloseHandler = new PageCloseHandler(taskStateManager, languageManager);
     pageCloseHandler.initialize();
+    
+    // 初始化更新日志查看器（优雅降级：模块加载失败不影响核心功能）
+    if (typeof ChangelogViewer !== 'undefined') {
+        try {
+            changelogViewer = new ChangelogViewer(languageManager);
+            changelogViewer.init();
+        } catch (e) {
+            console.warn('更新日志模块初始化失败，应用将继续运行:', e);
+            changelogViewer = null;
+        }
+    }
     
     // 绑定事件监听器
     bindEventListeners();
