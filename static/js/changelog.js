@@ -42,13 +42,20 @@ class ChangelogViewer {
             });
         }
 
-        // 从 HTML data-version 属性检查 NEW 标记（避免提前 fetch）
-        const htmlVersion = this.versionBadge?.dataset.version;
-        if (htmlVersion) {
-            const viewedVersion = this._safeGetStorage(this.storageKey);
-            if (!viewedVersion || this.compareVersions(htmlVersion, viewedVersion) > 0) {
-                this.showNewBadge();
-            }
+        // 尽早获取真实版本号，避免底部显示 HTML 中硬编码的旧版本
+        this.loadData().then(() => {
+            this._checkNewBadge(this.changelogData?.current_version);
+        });
+    }
+
+    /**
+     * 根据版本号检查是否显示 NEW 标记
+     */
+    _checkNewBadge(version) {
+        if (!version) return;
+        const viewedVersion = this._safeGetStorage(this.storageKey);
+        if (!viewedVersion || this.compareVersions(version, viewedVersion) > 0) {
+            this.showNewBadge();
         }
     }
 
@@ -69,6 +76,7 @@ class ChangelogViewer {
             // 加载成功后同步更新版本徽章文字
             if (this.versionBadge && this.changelogData.current_version) {
                 this.versionBadge.textContent = `v${this.changelogData.current_version}`;
+                this.versionBadge.dataset.version = this.changelogData.current_version;
             }
         } catch (error) {
             console.error('加载更新日志失败:', error);
