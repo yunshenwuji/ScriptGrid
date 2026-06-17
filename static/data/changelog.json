@@ -1,6 +1,26 @@
 {
-    "current_version": "1.4.0",
+    "current_version": "1.5.0",
     "releases": [
+        {
+            "version": "1.5.0",
+            "date": "2026-06-17",
+            "changes": {
+                "zh-CN": {
+                    "new": [
+                        "新增更新日志查看功能，支持版本历史中英双语展示"
+                    ],
+                    "improved": [],
+                    "fixed": []
+                },
+                "en": {
+                    "new": [
+                        "Added changelog viewer with bilingual version history display"
+                    ],
+                    "improved": [],
+                    "fixed": []
+                }
+            }
+        },
         {
             "version": "1.4.0",
             "date": "2026-06-17",
@@ -132,8 +152,7 @@
                 "zh-CN": {
                     "new": [
                         "新增 SUP 图像字幕 OCR 识别，支持多语言自动检测",
-                        "新增中英文双语支持与语言切换功能",
-                        "新增更新日志查看功能"
+                        "新增中英文双语支持与语言切换功能"
                     ],
                     "improved": [
                         "优化 SUP 转换进度显示，支持实时帧进度",
@@ -146,8 +165,7 @@
                 "en": {
                     "new": [
                         "Added SUP image subtitle OCR recognition with multi-language auto-detection",
-                        "Added bilingual Chinese-English support with language switching",
-                        "Added changelog viewer"
+                        "Added bilingual Chinese-English support with language switching"
                     ],
                     "improved": [
                         "Optimized SUP conversion progress display with real-time frame tracking",
