@@ -38,7 +38,6 @@ MSG_INFO_OCR_PROCESSING = "OCR识别中，请耐心等待..."
 # OCR 相关常量
 DEFAULT_OCR_LANGUAGES = ['ch_sim', 'en']  # 默认支持中英文
 OCR_MODEL_DIRECTORY = "models"  # EasyOCR 模型存储目录
-OCR_BATCH_SIZE = 10  # OCR 批处理大小
 
 MSG_INFO_SUCCESS = "成功"
 MSG_INFO_SUCCESS_DETAIL_TO_EXCEL = "转换完成！\n文件已保存至:\n{path}"

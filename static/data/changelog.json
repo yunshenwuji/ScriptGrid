@@ -1,6 +1,30 @@
 {
-    "current_version": "1.5.1",
+    "current_version": "1.5.2",
     "releases": [
+        {
+            "version": "1.5.2",
+            "date": "2026-07-19",
+            "changes": {
+                "zh-CN": {
+                    "improved": [
+                        "新增 SUP OCR 帧去重缓存，基于图像内容哈希避免对重复帧的冗余识别",
+                        "新增 OCR 帧去重命中率日志，便于评估去重收益"
+                    ],
+                    "fixed": [
+                        "修复首个有效字幕探测时对同一帧重复执行 OCR 的问题"
+                    ]
+                },
+                "en": {
+                    "improved": [
+                        "Added SUP OCR frame deduplication cache using image content hash to eliminate redundant recognition on duplicate frames",
+                        "Added OCR frame dedup hit rate logging for performance evaluation"
+                    ],
+                    "fixed": [
+                        "Fixed duplicate OCR execution on the same frame during first valid subtitle detection"
+                    ]
+                }
+            }
+        },
         {
             "version": "1.5.1",
             "date": "2026-06-17",

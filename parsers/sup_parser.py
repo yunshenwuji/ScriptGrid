@@ -4,6 +4,7 @@ SUP 字幕解析器
 """
 
 import os
+import hashlib
 import logging
 from exceptions import SupParseError
 from pgsreader import PGSReader
@@ -49,6 +50,27 @@ def _convert_pgs_timestamp_to_srt(pts_time):
     except Exception as e:
         logger.warning(f"时间戳转换失败 (pts_time={pts_time}): {e}")
         return "00:00:00,000"
+
+
+def _frame_ocr_key(ods, pds):
+    """
+    基于图像内容生成 OCR 缓存键,用于帧去重。
+    键由 RLE 图像字节 + 尺寸 + 调色板指纹组成。
+    包含调色板指纹是为了避免相同 RLE 数据在不同调色板下
+    (文字/背景映射不同)导致识别结果不同却被误命中。
+    调色板指纹只取影响"文字 vs 背景"的 Y(亮度) 和 Alpha 通道,
+    既足够区分又开销极低。
+    :param ods: ObjectDefinitionSegment 对象
+    :param pds: PaletteDefinitionSegment 对象
+    :return: 16 字节摘要,作为缓存键
+    """
+    h = hashlib.blake2b(digest_size=16)
+    h.update(bytes(ods.img_data))
+    h.update(ods.width.to_bytes(2, 'big'))
+    h.update(ods.height.to_bytes(2, 'big'))
+    for entry in pds.palette:
+        h.update(bytes((entry.Y, entry.Alpha)))
+    return h.digest()
 
 
 def parse_sup_timeline_only(file_path, progress_callback=None):
@@ -197,6 +219,11 @@ def parse_sup_to_srt_structure(file_path, target_language=None, progress_callbac
         subtitle_count = 0  # 改为从0开始计数
         first_valid_pts = None  # 记录第一个有效字幕的时间戳,用于对比分析
         
+        # OCR 结果缓存:图像内容哈希 -> 识别文本,避免对重复帧重复识别
+        ocr_cache = {}
+        cache_hits = 0   # 缓存命中次数
+        ocr_calls = 0    # 实际 OCR 调用次数
+        
         for i, ds in enumerate(displaysets):
             # 进度回调:处理帧进度
             if progress_callback:
@@ -218,17 +245,22 @@ def parse_sup_to_srt_structure(file_path, target_language=None, progress_callbac
                 # 提取时间戳(使用 PCS 的时间戳)
                 start_pts = pcs.pts
                 
-                # 记录第一个有效字幕的时间戳
-                if first_valid_pts is None:
-                    # 先检查这个帧是否有效字幕
-                    try:
-                        image = make_image(ods, pds)
-                        temp_text = ocr_engine.recognize_subtitle_text(image)
-                        if temp_text.strip():
-                            first_valid_pts = start_pts
-                            logger.info(f"第一个有效字幕的时间戳: {first_valid_pts} 秒")
-                    except Exception:
-                        pass
+                # OCR 识别(带帧去重缓存)
+                # 相同图像内容复用识别结果,命中时连 make_image 解码也一并省去
+                key = _frame_ocr_key(ods, pds)
+                if key in ocr_cache:
+                    text = ocr_cache[key]
+                    cache_hits += 1
+                else:
+                    image = make_image(ods, pds)
+                    text = ocr_engine.recognize_subtitle_text(image)
+                    ocr_cache[key] = text
+                    ocr_calls += 1
+                
+                # 记录第一个有效字幕的时间戳(复用上面的识别结果,不再重复 OCR)
+                if first_valid_pts is None and text.strip():
+                    first_valid_pts = start_pts
+                    logger.info(f"第一个有效字幕的时间戳: {first_valid_pts} 秒")
                 
                 # 查找下一个 DisplaySet 的时间戳作为结束时间
                 if i + 1 < len(displaysets):
@@ -240,12 +272,6 @@ def parse_sup_to_srt_structure(file_path, target_language=None, progress_callbac
                 # 转换时间格式
                 start_time = _convert_pgs_timestamp_to_srt(start_pts)
                 end_time = _convert_pgs_timestamp_to_srt(end_pts)
-                
-                # 生成图像
-                image = make_image(ods, pds)
-                
-                # OCR 识别
-                text = ocr_engine.recognize_subtitle_text(image)
                 
                 # 过滤空文本
                 if text.strip():
@@ -265,6 +291,13 @@ def parse_sup_to_srt_structure(file_path, target_language=None, progress_callbac
                 continue
         
         logger.info(f"SUP 解析完成,共提取到 {subtitle_count} 条字幕")
+        
+        # 记录 OCR 帧去重命中情况,便于评估去重收益
+        total_ocr_frames = cache_hits + ocr_calls
+        if total_ocr_frames > 0:
+            hit_rate = cache_hits / total_ocr_frames * 100
+            logger.info(f"OCR 帧去重: 命中 {cache_hits}/{total_ocr_frames} 帧 "
+                        f"(命中率 {hit_rate:.1f}%), 实际 OCR 调用 {ocr_calls} 次")
         
         # 进度回调:完成
         if progress_callback:
