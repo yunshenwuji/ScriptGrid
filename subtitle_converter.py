@@ -6,6 +6,7 @@
 """
 
 import os
+import math
 import logging
 from typing import List
 
@@ -57,6 +58,46 @@ def ms_to_srt_time(ms: int) -> str:
     return f"{hours:02d}:{minutes:02d}:{seconds:02d},{milliseconds:03d}"
 
 
+def _split_long_segment(start_ms: int, end_ms: int) -> List[tuple]:
+    """
+    将超长的口述稿时间段等分为多个子段。
+    
+    规则：
+    - 时长超过 NARRATION_MAX_DURATION_MS 时触发拆分
+    - 段数 N = ceil(时长 / NARRATION_MAX_DURATION_MS)
+    - 相邻子段之间保留 NARRATION_SPLIT_GAP_MS 间隔
+    - 每段时长 = (总时长 - 间隔总和) / N，余数分配给最后一段
+    
+    :param start_ms: 起始时间（毫秒）
+    :param end_ms: 结束时间（毫秒）
+    :return: [(子段开始ms, 子段结束ms), ...] 列表
+    """
+    duration = end_ms - start_ms
+    
+    if duration <= constants.NARRATION_MAX_DURATION_MS:
+        return [(start_ms, end_ms)]
+    
+    # 计算最少拆分段数
+    num_segments = math.ceil(duration / constants.NARRATION_MAX_DURATION_MS)
+    
+    # 扣除段间间隔后的可用时长，等分给每段
+    total_gap_ms = constants.NARRATION_SPLIT_GAP_MS * (num_segments - 1)
+    segment_duration = (duration - total_gap_ms) // num_segments
+    
+    segments = []
+    current_start = start_ms
+    for i in range(num_segments):
+        if i == num_segments - 1:
+            # 最后一段直接延伸到原始结束时间（吸收除法余数）
+            segments.append((current_start, end_ms))
+        else:
+            current_end = current_start + segment_duration
+            segments.append((current_start, current_end))
+            current_start = current_end + constants.NARRATION_SPLIT_GAP_MS
+    
+    return segments
+
+
 def generate_narration_timing(subtitles: List[List[str]], placeholder_text: str = "请填写口述文本") -> List[List[str]]:
     """
     根据字幕数据生成口述稿时间轴。
@@ -64,52 +105,79 @@ def generate_narration_timing(subtitles: List[List[str]], placeholder_text: str 
     算法：
     - 片头时间: 00:00:00,000
     - 片尾时间: 最后一条字幕的结束时间（不在片尾之后生成口述稿）
-    - 第一段口述稿: 开始=00:00:00,000，结束=第一条字幕开始时间 - 500ms
-    - 中间段口述稿: 开始=前一条字幕结束时间 + 500ms，结束=后一条字幕开始时间 - 500ms
+    - 第一段口述稿: 开始=00:00:00,000，结束=第一条字幕开始时间 - NARRATION_GAP_MS
+    - 中间段口述稿: 开始=前一条字幕结束时间 + NARRATION_GAP_MS，结束=后一条字幕开始时间 - NARRATION_GAP_MS
     - 不需要在最后一条字幕之后生成口述稿
-    - 过滤: 仅保留持续时间 >= 1000ms (1秒) 的口述稿字幕
+    - 过滤: 仅保留持续时间 >= NARRATION_MIN_DURATION_MS 的口述稿字幕
+    - 拆分: 超过 NARRATION_MAX_DURATION_MS 的段落等分为多段，相邻段间隔 NARRATION_SPLIT_GAP_MS
+    - 校验: 输入字幕必须按时间排序且无重叠，否则抛出异常
     
     :param subtitles: 已解析的 SRT 字幕数据，格式: [[index, start_time, end_time, text], ...]
     :param placeholder_text: 口述稿文本内容
     :return: 口述稿字幕数据，格式与输入相同，index 从 "1" 开始重新编号
+    :raises SubtitleConverterError: 当字幕存在时间重叠或乱序时
     """
     if not subtitles:
         return []
     
-    narration_segments = []
+    # 校验字幕时间轴：检查单条字幕自身合法性、相邻字幕乱序和重叠
+    prev_start_ms = None
+    prev_end_ms = None
+    for i in range(len(subtitles)):
+        cur_start_ms = srt_time_to_ms(subtitles[i][1])
+        cur_end_ms = srt_time_to_ms(subtitles[i][2])
+        
+        # 单条字幕自身校验：结束时间不能早于开始时间
+        if cur_end_ms < cur_start_ms:
+            logger.error(f"检测到非法字幕: 第 {i + 1} 条字幕结束时间早于开始时间")
+            raise SubtitleConverterError(constants.MSG_ERROR_NARRATION_OVERLAP)
+        
+        # 相邻字幕校验：乱序和重叠
+        if prev_start_ms is not None:
+            if cur_start_ms < prev_start_ms:
+                logger.error(f"检测到字幕乱序: 第 {i} 条与第 {i + 1} 条字幕时间顺序异常")
+                raise SubtitleConverterError(constants.MSG_ERROR_NARRATION_OVERLAP)
+            if cur_start_ms < prev_end_ms:
+                logger.error(f"检测到字幕重叠: 第 {i} 条与第 {i + 1} 条字幕时间存在交叉")
+                raise SubtitleConverterError(constants.MSG_ERROR_NARRATION_OVERLAP)
+        
+        prev_start_ms = cur_start_ms
+        prev_end_ms = cur_end_ms
     
-    # 片头时间
-    header_time_ms = 0
+    # 收集原始空白时间段 (start_ms, end_ms)
+    raw_gaps = []
     
     # 处理第一段口述稿（从片头到第一条字幕）
+    header_time_ms = 0
     first_subtitle_start_ms = srt_time_to_ms(subtitles[0][1])
-    first_narration_end_ms = first_subtitle_start_ms - 500
+    first_narration_end_ms = first_subtitle_start_ms - constants.NARRATION_GAP_MS
     
-    if first_narration_end_ms - header_time_ms >= 1000:
-        narration_segments.append([
-            "1",
-            ms_to_srt_time(header_time_ms),
-            ms_to_srt_time(first_narration_end_ms),
-            placeholder_text
-        ])
+    if first_narration_end_ms - header_time_ms >= constants.NARRATION_MIN_DURATION_MS:
+        raw_gaps.append((header_time_ms, first_narration_end_ms))
     
     # 处理中间段口述稿
     for i in range(len(subtitles) - 1):
         current_subtitle_end_ms = srt_time_to_ms(subtitles[i][2])
         next_subtitle_start_ms = srt_time_to_ms(subtitles[i + 1][1])
         
-        narration_start_ms = current_subtitle_end_ms + 500
-        narration_end_ms = next_subtitle_start_ms - 500
+        narration_start_ms = current_subtitle_end_ms + constants.NARRATION_GAP_MS
+        narration_end_ms = next_subtitle_start_ms - constants.NARRATION_GAP_MS
         
-        if narration_end_ms - narration_start_ms >= 1000:
-            narration_segments.append([
-                str(len(narration_segments) + 1),
-                ms_to_srt_time(narration_start_ms),
-                ms_to_srt_time(narration_end_ms),
-                placeholder_text
-            ])
+        if narration_end_ms - narration_start_ms >= constants.NARRATION_MIN_DURATION_MS:
+            raw_gaps.append((narration_start_ms, narration_end_ms))
     
     # 注意：不在最后一条字幕之后生成口述稿（片尾）
+    
+    # 对超长段落进行等分拆分，并生成最终结果
+    narration_segments = []
+    for gap_start, gap_end in raw_gaps:
+        for seg_start, seg_end in _split_long_segment(gap_start, gap_end):
+            narration_segments.append([
+                str(len(narration_segments) + 1),
+                ms_to_srt_time(seg_start),
+                ms_to_srt_time(seg_end),
+                placeholder_text
+            ])
     
     return narration_segments
 

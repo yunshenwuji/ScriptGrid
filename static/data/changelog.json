@@ -1,6 +1,36 @@
 {
-    "current_version": "1.5.2",
+    "current_version": "1.6.0",
     "releases": [
+        {
+            "version": "1.6.0",
+            "date": "2026-07-23",
+            "changes": {
+                "zh-CN": {
+                    "new": [
+                        "空白口述稿自动打轴功能新增超长段智能拆分能力，超过 30 秒的空白段等分为多段，并保持 500ms 间隔",
+                        "新增字幕时间轴校验，输入字幕存在重叠或乱序时阻断转换并提示错误"
+                    ],
+                    "improved": [
+                        "口述稿打轴业务阈值（间隔缓冲、最短/最长时长）统一由常量集中管理"
+                    ],
+                    "fixed": [
+                        "修复 SUP 时间轴解析回退时长可能超出下一有效帧起始时间导致时间重叠的问题"
+                    ]
+                },
+                "en": {
+                    "new": [
+                        "Added intelligent splitting for overly long segments in auto narration timing: blank segments exceeding 30 seconds are equally divided into multiple segments with 500ms gaps",
+                        "Added subtitle timeline validation that blocks conversion with an error when input subtitles overlap or are out of order"
+                    ],
+                    "improved": [
+                        "Centralized narration timing business thresholds (gap buffer, min/max duration) as managed constants"
+                    ],
+                    "fixed": [
+                        "Fixed SUP timeline parsing fallback duration exceeding the next valid frame's start time, causing timestamp overlap"
+                    ]
+                }
+            }
+        },
         {
             "version": "1.5.2",
             "date": "2026-07-19",

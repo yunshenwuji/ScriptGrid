@@ -25,6 +25,13 @@ MSG_ERROR_PROCESSING_DETAIL_XLSX = "处理 Excel 文件时发生错误: \n{error
 MSG_ERROR_PARSING_XLSX = "解析 Excel 文件时出错: {error}"
 MSG_ERROR_WRITING_SRT = "写入 SRT 文件时出错: {error}"
 
+# --- 口述稿自动打轴相关 ---
+NARRATION_GAP_MS = 500            # 口述稿与前后对白之间的最小间隔（毫秒）
+NARRATION_SPLIT_GAP_MS = 500      # 超长段拆分后相邻子段之间的间隔（毫秒）
+NARRATION_MIN_DURATION_MS = 1000  # 单条口述稿的最短持续时间（毫秒）
+NARRATION_MAX_DURATION_MS = 30000 # 单条口述稿的最长持续时间（毫秒），超过则等分拆分
+MSG_ERROR_NARRATION_OVERLAP = "字幕时间轴存在重叠或乱序，无法生成口述稿。请检查输入的字幕文件。"
+
 # --- SUP PGS 转换相关 ---
 MSG_WARNING_NO_DATA_PARSED_DETAIL_SUP = "未能从 SUP 文件中提取任何有效的字幕数据。"
 MSG_ERROR_PROCESSING_DETAIL_SUP = "处理 SUP 文件时发生错误: \n{error}"

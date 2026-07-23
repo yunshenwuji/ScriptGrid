@@ -127,7 +127,16 @@ def parse_sup_timeline_only(file_path, progress_callback=None):
                 # 查找下一个 DisplaySet 的时间戳作为结束时间
                 if i + 1 < len(displaysets):
                     next_pcs = next((s for s in displaysets[i + 1].segments if s.type == 'PCS'), None)
-                    end_pts = next_pcs.pts if next_pcs else start_pts + 2000  # 默认2秒(毫秒单位)
+                    if next_pcs:
+                        end_pts = next_pcs.pts
+                    else:
+                        # 下一帧缺少PCS时回退为默认2秒，但不超过后续最近有效帧的起始时间，避免产生时间重叠
+                        end_pts = start_pts + 2000
+                        for j in range(i + 1, len(displaysets)):
+                            future_pcs = next((s for s in displaysets[j].segments if s.type == 'PCS'), None)
+                            if future_pcs:
+                                end_pts = min(end_pts, future_pcs.pts)
+                                break
                 else:
                     end_pts = start_pts + 2000  # 最后一帧,默认显示2秒
                 
