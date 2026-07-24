@@ -93,7 +93,22 @@ const languages = {
         changelogLoading: '加载中...',
         changelogError: '加载更新日志失败，请稍后重试',
         changelogEmpty: '暂无更新日志',
-        changelogViewBtn: '查看更新日志'
+        changelogViewBtn: '查看更新日志',
+
+        // 使用说明
+        usageTitle: '使用说明',
+        usageViewBtn: '使用说明',
+        usageClose: '关闭',
+        usageLoading: '加载中...',
+        usageError: '加载使用说明失败，请稍后重试',
+
+        // 转换类型动态提示（key 对应转换类型 value）
+        hint_ass_to_srt: '将 .ass 字幕转换为通用的 .srt 格式。',
+        hint_subtitle_to_excel: '导出为含「序号 / 开始时间 / 结束时间 / 字幕内容」四列的 Excel 表格，便于校对编辑。',
+        hint_xlsx_to_srt: '将表格转换回 .srt 字幕；首行表头需为「序号 / 开始时间 / 结束时间 / 字幕内容」。',
+        hint_sup_to_srt: '通过 OCR 识别 SUP 图像字幕并生成 .srt；可在下方指定字幕语言。',
+        hint_sup_to_excel: '通过 OCR 识别 SUP 图像字幕并导出为 Excel 表格；可在下方指定字幕语言。',
+        hint_auto_narration_timing: '在对白空隙自动生成带占位文本的口述稿条目（间隔 500ms，最短 1s，超 30s 等分）。'
     },
 
     'en': {
@@ -184,7 +199,22 @@ const languages = {
         changelogLoading: 'Loading...',
         changelogError: 'Failed to load changelog, please try again later',
         changelogEmpty: 'No changelog entries',
-        changelogViewBtn: 'View Changelog'
+        changelogViewBtn: 'View Changelog',
+
+        // 使用说明
+        usageTitle: 'User Guide',
+        usageViewBtn: 'User Guide',
+        usageClose: 'Close',
+        usageLoading: 'Loading...',
+        usageError: 'Failed to load the user guide, please try again later',
+
+        // Conversion-type contextual hints (key matches conversion type value)
+        hint_ass_to_srt: 'Convert .ass subtitles into the universal .srt format.',
+        hint_subtitle_to_excel: 'Export to an Excel sheet with four columns (Index / Start Time / End Time / Text) for easy proofreading.',
+        hint_xlsx_to_srt: 'Convert the spreadsheet back into .srt; the header row must be Index / Start Time / End Time / Text.',
+        hint_sup_to_srt: 'Recognize the SUP image subtitles via OCR and generate .srt; you can set the subtitle language below.',
+        hint_sup_to_excel: 'Recognize the SUP image subtitles via OCR and export to Excel; you can set the subtitle language below.',
+        hint_auto_narration_timing: 'Auto-create placeholder narration entries in the gaps between dialogue (500ms gap, min 1s, split above 30s).'
     }
 };
 
@@ -257,6 +287,16 @@ class LanguageManager {
         // 通知更新日志查看器语言已切换
         if (typeof changelogViewer !== 'undefined' && changelogViewer) {
             changelogViewer.onLanguageChange();
+        }
+
+        // 通知使用说明查看器语言已切换
+        if (typeof usageGuideViewer !== 'undefined' && usageGuideViewer) {
+            usageGuideViewer.onLanguageChange();
+        }
+
+        // 刷新转换类型动态提示
+        if (typeof updateConversionHint === 'function') {
+            updateConversionHint();
         }
     }
     

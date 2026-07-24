@@ -1,0 +1,150 @@
+{
+    "sections": [
+        {
+            "id": "overview",
+            "title": {
+                "zh-CN": "功能总览",
+                "en": "Overview"
+            },
+            "body": {
+                "zh-CN": [
+                    { "type": "p", "text": "述格支持字幕、表格与图像字幕之间的互转，以及空白口述稿自动打轴。选择文件后，转换类型下拉框会根据文件格式自动列出可用选项。" },
+                    { "type": "table", "headers": ["上传文件", "可选转换"], "rows": [
+                        [".ass", "ASS 转 SRT ｜ 字幕转表格 ｜ 空白口述稿自动打轴"],
+                        [".srt", "字幕转表格 ｜ 空白口述稿自动打轴"],
+                        [".xlsx", "表格转字幕"],
+                        [".sup", "SUP 转 SRT ｜ SUP 转表格 ｜ 空白口述稿自动打轴"]
+                    ] }
+                ],
+                "en": [
+                    { "type": "p", "text": "ScriptGrid converts between subtitles, spreadsheets, and image-based subtitles, and can auto-time blank narration scripts. After you pick a file, the conversion-type dropdown lists the options available for that format." },
+                    { "type": "table", "headers": ["Uploaded file", "Available conversions"], "rows": [
+                        [".ass", "ASS to SRT ｜ Subtitle to Excel ｜ Auto Narration Timing"],
+                        [".srt", "Subtitle to Excel ｜ Auto Narration Timing"],
+                        [".xlsx", "Excel to Subtitle"],
+                        [".sup", "SUP to SRT ｜ SUP to Excel ｜ Auto Narration Timing"]
+                    ] }
+                ]
+            }
+        },
+        {
+            "id": "subtitle_convert",
+            "title": {
+                "zh-CN": "字幕互转与转表格",
+                "en": "Subtitle Conversion & Export to Excel"
+            },
+            "body": {
+                "zh-CN": [
+                    { "type": "list", "items": [
+                        "ASS 转 SRT：将 .ass 字幕转换为通用的 .srt 格式。",
+                        "字幕转表格：将 .ass 或 .srt 字幕导出为 Excel 表格，包含「序号、开始时间、结束时间、字幕内容」四列，便于逐条校对与编辑。"
+                    ] }
+                ],
+                "en": [
+                    { "type": "list", "items": [
+                        "ASS to SRT: convert .ass subtitles to the universal .srt format, preserving line breaks and formatting.",
+                        "Subtitle to Excel: export .ass or .srt subtitles to a spreadsheet with four columns (Index, Start Time, End Time, Text) for easy line-by-line proofreading and editing."
+                    ] }
+                ]
+            }
+        },
+        {
+            "id": "excel_to_subtitle",
+            "title": {
+                "zh-CN": "表格转字幕",
+                "en": "Excel to Subtitle"
+            },
+            "body": {
+                "zh-CN": [
+                    { "type": "p", "text": "将 .xlsx 表格转换回 .srt 字幕。为保证正确解析，表格需满足以下要求：" },
+                    { "type": "list", "items": [
+                        "首行表头必须依次为：序号、开始时间、结束时间、字幕内容（仅校验前 4 列，之后多余的空列会被忽略）。",
+                        "字幕数据从表头的下一行开始填写，空行会被自动跳过。",
+                        "时间格式需要与「字幕转表格」导出的表格保持一致，否则会出现转换得到的字幕无法使用，或出现未知错误。"
+                    ] }
+                ],
+                "en": [
+                    { "type": "p", "text": "Convert an .xlsx spreadsheet back into .srt subtitles. For correct parsing, the spreadsheet must meet these requirements:" },
+                    { "type": "list", "items": [
+                        "The header row must be, in order: Index, Start Time, End Time, Text (only the first 4 columns are validated; extra trailing columns are ignored).",
+                        "Subtitle data starts from the row right after the header; blank rows are skipped automatically.",
+                        "The time format must match the spreadsheet exported by \"Subtitle to Excel\"; otherwise the resulting subtitles may be unusable or unexpected errors may occur."
+                    ] }
+                ]
+            }
+        },
+        {
+            "id": "sup_ocr",
+            "title": {
+                "zh-CN": "SUP 图像字幕识别 (OCR)",
+                "en": "SUP Image Subtitle Recognition (OCR)"
+            },
+            "body": {
+                "zh-CN": [
+                    { "type": "p", "text": "针对 .sup（PGS）图像字幕，述格通过 OCR 识别画面中的文字并生成 SRT 或 Excel。" },
+                    { "type": "list", "items": [
+                        "字幕语言默认为「自动检测」；若明确知道字幕的语言，可在「字幕语言」下拉框手动指定语言以提升识别准确率。",
+                        "支持简体/繁体中文、英语、日语、韩语、泰语、阿拉伯语、印地语、孟加拉语、泰米尔语、泰卢固语、卡纳达语、德语、法语、俄语、西里尔字母等。",
+                        "识别为异步处理，页面会实时显示帧进度与已识别字幕数量；耗时取决于字幕数量，请耐心等待。"
+                    ] }
+                ],
+                "en": [
+                    { "type": "p", "text": "For .sup (PGS) image-based subtitles, ScriptGrid uses OCR to recognize the on-screen text and generate SRT or Excel output." },
+                    { "type": "list", "items": [
+                        "Subtitle language defaults to \"Auto Detect\"; if you already know the subtitle language, manually select it in the \"Subtitle Language\" dropdown to improve recognition accuracy.",
+                        "Supported languages include Simplified/Traditional Chinese, English, Japanese, Korean, Thai, Arabic, Hindi, Bengali, Tamil, Telugu, Kannada, German, French, Russian, Cyrillic, and more.",
+                        "Recognition runs asynchronously; the page shows live frame progress and the number of recognized subtitles. Processing time depends on the subtitle count, so please be patient."
+                    ] }
+                ]
+            }
+        },
+        {
+            "id": "auto_timing",
+            "title": {
+                "zh-CN": "空白口述稿自动打轴",
+                "en": "Auto Narration Timing"
+            },
+            "body": {
+                "zh-CN": [
+                    { "type": "p", "text": "本功能可帮助口述影像创作者对空白的口述稿一键完成时间轴标注，后续撰稿时，只需根据实际情况微调时间即可。上传 .ass / .srt / .sup 文件后选择该功能，述格会基于对白字幕智能推算出没有对白的片段，然后自动生成带占位文本的口述稿条目，最终输出一份标准 srt 文件。" },
+                    { "type": "list", "items": [
+                        "生成的口述稿与前后对白之间保持 500 毫秒间隔，单条最短持续 1 秒。",
+                        "超过 30 秒的超长空白段会被等分为多段，子段之间同样保持 500 毫秒间隔，避免单条时长过长。",
+                        "生成后可将表格中的占位文本替换为实际口述内容。"
+                    ] }
+                ],
+                "en": [
+                    { "type": "p", "text": "This feature helps audio description creators annotate the timeline of a blank narration script in one click, so that when writing later you only need to fine-tune the timings as needed. Upload an .ass / .srt / .sup file and select this feature; based on the dialogue subtitles, ScriptGrid intelligently infers the segments that have no dialogue, then automatically generates placeholder narration entries and finally outputs a standard .srt file." },
+                    { "type": "list", "items": [
+                        "Generated narration keeps a 500 ms gap from the surrounding dialogue, and each entry lasts at least 1 second.",
+                        "Blank segments longer than 30 seconds are split evenly into multiple entries, each also separated by a 500 ms gap, to avoid overly long single entries.",
+                        "After generation, replace the placeholder text in the spreadsheet with your actual narration."
+                    ] }
+                ]
+            }
+        },
+        {
+            "id": "notes",
+            "title": {
+                "zh-CN": "注意事项",
+                "en": "Notes"
+            },
+            "body": {
+                "zh-CN": [
+                    { "type": "list", "items": [
+                        "时间轴校验：若输入字幕存在时间重叠或乱序，转换会被中断并提示错误，请先修正字幕后重试。",
+                        "处理期间请勿关闭或刷新页面，否则正在进行的任务会被中断（页面会弹出提醒）。",
+                        "界面语言：点击右上角按钮可在中文与 English 之间切换，选择会被自动记住。"
+                    ] }
+                ],
+                "en": [
+                    { "type": "list", "items": [
+                        "Timeline validation: if input subtitles overlap or are out of order, the conversion is blocked with an error. Fix the subtitles and try again.",
+                        "Do not close or refresh the page while processing, or the running task will be interrupted (a confirmation dialog will appear).",
+                        "Interface language: use the button in the top-right corner to switch between Chinese and English; your choice is remembered."
+                    ] }
+                ]
+            }
+        }
+    ]
+}

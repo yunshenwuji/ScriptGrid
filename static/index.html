@@ -10,8 +10,11 @@
     <link href="/static/css/style.css" rel="stylesheet">
 </head>
 <body>
-    <!-- 语言切换器 -->
-    <div class="language-switch position-fixed top-0 end-0 m-3" style="z-index: 1050;">
+    <!-- 顶部工具栏：使用说明 + 语言切换 -->
+    <div class="language-switch position-fixed top-0 end-0 m-3 d-flex gap-2" style="z-index: 1050;">
+        <button id="usageGuideBtn" type="button" class="btn btn-outline-primary btn-sm"
+            data-i18n="usageViewBtn" data-i18n-aria="usageViewBtn" data-i18n-title="usageViewBtn"
+            aria-label="使用说明" title="使用说明">使用说明</button>
         <button id="langSwitchBtn" class="btn btn-outline-secondary btn-sm">
             <span id="langSwitchText">English</span>
         </button>
@@ -39,6 +42,7 @@
                         <select class="form-select" id="conversionType" aria-label="选择转换类型" disabled data-i18n-aria="conversionAriaLabel">
                             <option value="" selected data-i18n="selectFile">请先选择文件</option>
                         </select>
+                        <div id="conversionHint" class="form-text conversion-hint" style="display: none;" aria-live="polite"></div>
                     </div>
 
                     <!-- 语言选择框（仅对SUP文件显示） -->
@@ -147,6 +151,23 @@
         </div>
     </div>
 
+    <!-- 使用说明模态框 -->
+    <div class="modal fade" id="usageModal" tabindex="-1" aria-labelledby="usageModalTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-scrollable modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="usageModalTitle" data-i18n="usageTitle">使用说明</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" data-i18n-aria="usageClose"></button>
+                </div>
+                <div class="modal-body" id="usageModalBody">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="usageClose">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap 5 JS Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
@@ -157,6 +178,7 @@
     <script src="/static/js/page-close.js"></script>
     <script src="/static/js/progress.js"></script>
     <script src="/static/js/changelog.js"></script>
+    <script src="/static/js/usage.js"></script>
     <script src="/static/js/app.js"></script>
 </body>
 </html>

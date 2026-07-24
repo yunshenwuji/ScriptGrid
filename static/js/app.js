@@ -8,6 +8,7 @@ let languageManager;
 let taskStateManager;
 let pageCloseHandler;
 let changelogViewer;
+let usageGuideViewer;
 let supportedLanguages = {};
 
 // DOM元素
@@ -47,6 +48,17 @@ function initializeApp() {
         } catch (e) {
             console.warn('更新日志模块初始化失败，应用将继续运行:', e);
             changelogViewer = null;
+        }
+    }
+
+    // 初始化使用说明查看器（优雅降级：模块加载失败不影响核心功能）
+    if (typeof UsageGuideViewer !== 'undefined') {
+        try {
+            usageGuideViewer = new UsageGuideViewer(languageManager);
+            usageGuideViewer.init();
+        } catch (e) {
+            console.warn('使用说明模块初始化失败，应用将继续运行:', e);
+            usageGuideViewer = null;
         }
     }
     
@@ -103,7 +115,13 @@ function bindEventListeners() {
             languageSelectionContainer.style.display = 'none';
             hideMessage();
         }
+
+        // 文件变更后转换类型被重置，同步更新动态提示
+        updateConversionHint();
     });
+
+    // 转换类型变更时更新动态提示
+    conversionTypeSelect.addEventListener('change', updateConversionHint);
 
     // 表单提交事件监听器
     form.addEventListener('submit', async function (e) {
@@ -295,6 +313,33 @@ function updateLanguageOptions() {
         }
         targetLanguageSelect.appendChild(option);
     });
+}
+
+/**
+ * 更新转换类型下方的动态上下文提示
+ * 根据当前所选转换类型，显示对应的一句话说明（key 为 hint_<转换类型value>）
+ */
+function updateConversionHint() {
+    const hintEl = document.getElementById('conversionHint');
+    if (!hintEl || !conversionTypeSelect || !languageManager) return;
+
+    const value = conversionTypeSelect.value;
+    if (!value) {
+        hintEl.style.display = 'none';
+        hintEl.textContent = '';
+        return;
+    }
+
+    const key = 'hint_' + value;
+    const text = languageManager.getText(key);
+    // getText 在缺失时会原样返回 key，用于判断是否存在对应文案
+    if (text && text !== key) {
+        hintEl.textContent = text;
+        hintEl.style.display = 'block';
+    } else {
+        hintEl.style.display = 'none';
+        hintEl.textContent = '';
+    }
 }
 
 /**

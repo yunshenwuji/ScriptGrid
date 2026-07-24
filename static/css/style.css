@@ -182,3 +182,67 @@ a:focus, button:focus, input:focus, select:focus {
     color: #adb5bd;
     font-weight: bold;
 }
+
+/* ==================== 转换类型动态提示 ==================== */
+
+.conversion-hint {
+    margin-top: 0.4rem;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: #084298;
+    background-color: #e7f1ff;
+    border-left: 3px solid #0d6efd;
+    border-radius: 0.25rem;
+}
+
+/* ==================== 使用说明模态框 ==================== */
+
+.usage-accordion .accordion-button {
+    font-size: 0.95rem;
+    font-weight: 600;
+    padding: 0.75rem 1rem;
+}
+
+.usage-accordion .accordion-body {
+    padding: 0.85rem 1rem;
+}
+
+.usage-p {
+    font-size: 0.875rem;
+    color: #495057;
+    line-height: 1.7;
+    margin-bottom: 0.6rem;
+}
+
+.usage-p:last-child {
+    margin-bottom: 0;
+}
+
+.usage-list {
+    padding-left: 1.25rem;
+    margin: 0;
+}
+
+.usage-list li {
+    font-size: 0.875rem;
+    color: #6c757d;
+    line-height: 1.7;
+    padding: 0.1rem 0;
+}
+
+.usage-table {
+    font-size: 0.85rem;
+    margin-bottom: 0;
+}
+
+.usage-table th[scope="col"] {
+    white-space: nowrap;
+    color: #495057;
+}
+
+.usage-table th[scope="row"] {
+    font-weight: 600;
+    color: #0d6efd;
+    white-space: nowrap;
+}

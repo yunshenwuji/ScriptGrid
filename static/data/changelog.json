@@ -1,6 +1,28 @@
 {
-    "current_version": "1.6.0",
+    "current_version": "1.7.0",
     "releases": [
+        {
+            "version": "1.7.0",
+            "date": "2026-07-24",
+            "changes": {
+                "zh-CN": {
+                    "new": [
+                        "新增使用说明功能，通过右上角入口打开帮助面板，按功能分区展示各转换类型的操作指引，支持中英双语",
+                        "新增转换类型动态提示，选择转换类型后在下方实时显示对应的一句话操作说明"
+                    ],
+                    "improved": [],
+                    "fixed": []
+                },
+                "en": {
+                    "new": [
+                        "Added a user guide opened from a top-right entry, presenting operation instructions for each conversion type grouped by feature, with bilingual Chinese-English support",
+                        "Added contextual hints for conversion types, showing a one-line operation tip below the dropdown once a conversion type is selected"
+                    ],
+                    "improved": [],
+                    "fixed": []
+                }
+            }
+        },
         {
             "version": "1.6.0",
             "date": "2026-07-23",
