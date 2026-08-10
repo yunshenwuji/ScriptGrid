@@ -1,7 +1,7 @@
 # 述格 (ScriptGrid) Web 应用 - 后端依赖
 
 fastapi==0.140.0
-uvicorn[standard]==0.51.0
+uvicorn[standard]==0.52.1
 openpyxl==3.1.5
 python-multipart==0.0.32
 
