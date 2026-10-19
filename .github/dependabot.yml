@@ -10,7 +10,7 @@ updates:
       timezone: "Asia/Shanghai"
     open-pull-requests-limit: 5
     commit-message:
-      prefix: "deps"
+      prefix: "chore"
       include: "scope"
     # 允许的版本更新类型
     allow:
